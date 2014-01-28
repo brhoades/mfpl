@@ -1,0 +1,6 @@
+#C stuff
+*.out
+*.o
+
+#lex intermediary
+*.yy.c
