@@ -92,7 +92,7 @@ LPAREN \(
 
 /* Comment, anything after ; */
 
-COMMENT ;[^\n]$
+COMMENT ;[^\n]*$
 
 %%
 {NEWLINE}   {
