@@ -246,13 +246,13 @@ int yywrap( )
 
 void printTokenInfo( const char* tokenType, const char* lexeme )
 {
-  printf( "TOKEN: %s  LEXEME: %s\n", tokenType, lexeme );
+  printf( "TOKEN: %s\tLEXEME: %s\n", tokenType, lexeme );
 }
 
 int main( )
 {
   while( yylex( ) );
-  printf( "Processed %d lines\n", numLines );
+  //printf( "Processed %d lines\n", numLines );
 
   return 0;
 }
