@@ -26,6 +26,8 @@
     T_T,
     T_NIL,
     T_OPERATOR,
+    T_RPAREN,
+    T_LPAREN,
     T_UNKNOWN
 
   } TYPE;
@@ -63,6 +65,10 @@ NIL nil/{AWSPACENLINE}
 
 /* matches * / + - < > >= <= = /= *=  */
 OPERATOR [<>/*]{0,1}=|[*/+-<>]
+
+/* parenthesis */
+RPAREN \)
+LPAREN \(
 
 %%
 {NEWLINE}   {
@@ -142,6 +148,15 @@ OPERATOR [<>/*]{0,1}=|[*/+-<>]
               return T_OPERATOR;
             }
 
+{RPAREN}    {
+              printTokenInfo("RPAREN", yytext);
+              return T_RPAREN;
+            }
+
+{LPAREN}    {
+              printTokenInfo("LPAREN", yytext);
+              return T_LPAREN;
+            }
 
 %%
 
