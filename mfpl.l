@@ -83,7 +83,7 @@ GT >
 LE <=
 GE >=
 EQ =
-NE \!=
+NE \/=
 
 
 /* parenthesis */
@@ -177,6 +177,26 @@ COMMENT ;[^\n]*$
               return T_LPAREN;
             }
 
+{ADD}       {
+              printTokenInfo("ADD", yytext);
+              return T_ADD;
+            }
+
+{SUB}       {
+              printTokenInfo("SUB", yytext);
+              return T_SUB;
+            }
+
+{MULT}      {
+              printTokenInfo("MULT", yytext);
+              return T_MULT;
+            }
+
+{DIV}       {
+              printTokenInfo("DIV", yytext);
+              return T_DIV;
+            }
+
 {LT}        {
               printTokenInfo("LT", yytext);
               return T_LT;
@@ -208,7 +228,7 @@ COMMENT ;[^\n]*$
             }
 
 {COMMENT}   {
-              printTokenInfo("COMMENT", yytext);
+              //printTokenInfo("COMMENT", yytext);
               return T_COMMENT;
             }
 
