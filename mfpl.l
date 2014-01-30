@@ -15,7 +15,16 @@
     T_INTCONST,
     T_IDENT,
     T_STRCONST,
-    T_KEYWORD,
+    T_LETSTAR,
+    T_IF,
+    T_LAMBDA,
+    T_PRINT,
+    T_INPUT,
+    T_AND,
+    T_OR,
+    T_NOT,
+    T_T,
+    T_NIL,
     T_OPERATOR,
     T_UNKNOWN
 
@@ -27,17 +36,31 @@
 
 NEWLINE \n
 WSPACE [ \t\r]+
+AWSPACENLINE [\n\t\r ]+
 DIGIT [0-9]
 LETTER [a-zA-Z]
 
 /*sequence of one or more digits, can start with +/-, no size constraint*/
 INTCONST (\-|\+)?[0-9]+
+
 /*letter/underscore, then any number of letters / digits / underscores*/
 IDENT [A-Za-z_][A-Za-z0-9_]*
+
 /*a ' followed by a ' with stuff in between, or a " followed by " with the same stuff*/
 STRCONST \"[^\n]*\"|\'[^\n]*\'
+
 /* let*, if, lambda, print, input, and, or, not, t, nil */
-KEYWORD (let\*|if|lambda|print|input|and|not|t|nil)/[\n\t\r ]+
+LETSTAR let\*/{AWSPACENLINE}
+IF if/{AWSPACENLINE}
+LAMBDA lambda/{AWSPACENLINE}
+PRINT print/{AWSPACENLINE}
+INPUT input/{AWSPACENLINE}
+AND and/{AWSPACENLINE}
+OR or/{AWSPACENLINE}
+NOT not/{AWSPACENLINE}
+T t/{AWSPACENLINE}
+NIL nil/{AWSPACENLINE}
+
 /* matches * / + - < > >= <= = /= *=  */
 OPERATOR [<>/*]{0,1}=|[*/+-<>]
 
@@ -64,15 +87,61 @@ OPERATOR [<>/*]{0,1}=|[*/+-<>]
               return T_STRCONST;
             }
 
-{KEYWORD}   {
-              printTokenInfo("KEYWORD", yytext);
-              return T_KEYWORD;
+{LETSTAR}   {
+              printTokenInfo("LETSTAR", yytext);
+              return T_LETSTAR;
             }
 
-{OPERATOR}   {
+{IF}        {
+              printTokenInfo("IF", yytext);
+              return T_IF;
+            }
+
+{LAMBDA}    {
+              printTokenInfo("LAMBDA", yytext);
+              return T_LAMBDA;
+            }
+
+{PRINT}     {
+              printTokenInfo("PRINT", yytext);
+              return T_PRINT;
+            }
+
+{INPUT}     {
+              printTokenInfo("INPUT", yytext);
+              return T_INPUT;
+            }
+
+{AND}       {
+              printTokenInfo("AND", yytext);
+              return T_AND;
+            }
+
+{OR}        {
+              printTokenInfo("OR", yytext);
+              return T_OR;
+            }
+
+{NOT}       {
+              printTokenInfo("NOT", yytext);
+              return T_NOT;
+            }
+
+{T}         {
+              printTokenInfo("T", yytext);
+              return T_T;
+            }
+
+{NIL}       {
+              printTokenInfo("NIL", yytext);
+              return T_NIL;
+            }
+
+{OPERATOR}  {
               printTokenInfo("OPERATOR", yytext);
               return T_OPERATOR;
             }
+
 
 %%
 
