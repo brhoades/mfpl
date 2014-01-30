@@ -12,10 +12,11 @@
   typedef enum
   {
     RESERVED,   //reserved by lex
-    T_IDENT,
     T_INTCONST,
+    T_IDENT,
     T_STRCONST,
-    T_NEWLINE,
+    T_KEYWORD,
+    T_OPERATOR,
     T_UNKNOWN
 
   } TYPE;
@@ -24,8 +25,8 @@
   void printTokenInfo( const char* tokenTypem, const char* lexeme );
 %}
 
-WSPACE [ \t\r]+
 NEWLINE \n
+WSPACE [ \t\r]+
 DIGIT [0-9]
 LETTER [a-zA-Z]
 
@@ -35,23 +36,44 @@ INTCONST (\-|\+)?[0-9]+
 IDENT [A-Za-z_][A-Za-z0-9_]*
 /*a ' followed by a ' with stuff in between, or a " followed by " with the same stuff*/
 STRCONST \"[^\n]*\"|\'[^\n]*\'
+/* let*, if, lambda, print, input, and, or, not, t, nil */
+KEYWORD (let\*|if|lambda|print|input|and|not|t|nil)/[\n\t\r ]+
+/* matches * / + - < > >= <= = /= *=  */
+OPERATOR [<>/*]{0,1}=|[*/+-<>]
 
 %%
+{NEWLINE}   {
+               numLines += 1 ;
+            }
 
-{IDENT} {
-          printTokenInfo("IDENT", yytext);
-          return T_IDENT;
-        }
-        
-{STRCONST} {
-              printTokenInfo("STRCONST", yytext);
-              return T_STRCONST;
-           }
+{WSPACE}    {
+            }
 
-{INTCONST} {
+{INTCONST}  {
               printTokenInfo("INTCONST", yytext);
               return T_INTCONST;
-           }
+            }
+
+{IDENT}     {
+              printTokenInfo("IDENT", yytext);
+              return T_IDENT;
+            }
+
+{STRCONST}  {
+              printTokenInfo("STRCONST", yytext);
+              return T_STRCONST;
+            }
+
+{KEYWORD}   {
+              printTokenInfo("KEYWORD", yytext);
+              return T_KEYWORD;
+            }
+
+{OPERATOR}   {
+              printTokenInfo("OPERATOR", yytext);
+              return T_OPERATOR;
+            }
+
 %%
 
 int yywrap( )
@@ -62,7 +84,6 @@ int yywrap( )
 void printTokenInfo( const char* tokenType, const char* lexeme )
 {
   printf( "TOKEN: %s  LEXEME: %s\n", tokenType, lexeme );
-  numLines++;
 }
 
 int main( )
