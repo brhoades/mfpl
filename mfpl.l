@@ -25,7 +25,16 @@
     T_NOT,
     T_T,
     T_NIL,
-    T_OPERATOR,
+    T_ADD,
+    T_SUB,
+    T_MULT,
+    T_DIV,
+    T_LT,
+    T_GT,
+    T_LE,
+    T_GE,
+    T_EQ,
+    T_NE,
     T_RPAREN,
     T_LPAREN,
     T_UNKNOWN
@@ -64,7 +73,17 @@ T t/{AWSPACENLINE}
 NIL nil/{AWSPACENLINE}
 
 /* matches * / + - < > >= <= = /= *=  */
-OPERATOR [<>/*]{0,1}=|[*/+-<>]
+ADD \+
+SUB \-
+MULT \*
+DIV \/
+LT <
+GT >
+LE <=
+GE >=
+EQ =
+NE \!=
+
 
 /* parenthesis */
 RPAREN \)
@@ -143,11 +162,6 @@ LPAREN \(
               return T_NIL;
             }
 
-{OPERATOR}  {
-              printTokenInfo("OPERATOR", yytext);
-              return T_OPERATOR;
-            }
-
 {RPAREN}    {
               printTokenInfo("RPAREN", yytext);
               return T_RPAREN;
@@ -156,6 +170,36 @@ LPAREN \(
 {LPAREN}    {
               printTokenInfo("LPAREN", yytext);
               return T_LPAREN;
+            }
+
+{LT}        {
+              printTokenInfo("LT", yytext);
+              return T_LT;
+            }
+
+{GT}        {
+              printTokenInfo("GT", yytext);
+              return T_GT;
+            }
+
+{LE}        {
+              printTokenInfo("LE", yytext);
+              return T_LE;
+            }
+
+{GE}        {
+              printTokenInfo("GE", yytext);
+              return T_GE;
+            }
+
+{EQ}        {
+              printTokenInfo("EQ", yytext);
+              return T_EQ;
+            }
+
+{NE}        {
+              printTokenInfo("NE", yytext);
+              return T_NE;
             }
 
 %%
