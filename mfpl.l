@@ -37,6 +37,7 @@
     T_NE,
     T_RPAREN,
     T_LPAREN,
+    T_COMMENT,
     T_UNKNOWN
 
   } TYPE;
@@ -88,6 +89,10 @@ NE \!=
 /* parenthesis */
 RPAREN \)
 LPAREN \(
+
+/* Comment, anything after ; */
+
+COMMENT ;[^\n]$
 
 %%
 {NEWLINE}   {
@@ -200,6 +205,16 @@ LPAREN \(
 {NE}        {
               printTokenInfo("NE", yytext);
               return T_NE;
+            }
+
+{COMMENT}   {
+              printTokenInfo("COMMENT", yytext);
+              return T_COMMENT;
+            }
+
+.           {
+               printTokenInfo("UNKNOWN", yytext);
+               return T_UNKNOWN;
             }
 
 %%
