@@ -13,7 +13,6 @@
   {
     RESERVED,   //reserved by lex
     T_INTCONST,
-    T_IDENT,
     T_STRCONST,
     T_LETSTAR,
     T_IF,
@@ -38,6 +37,7 @@
     T_RPAREN,
     T_LPAREN,
     T_COMMENT,
+    T_IDENT,
     T_UNKNOWN
 
   } TYPE;
@@ -55,23 +55,20 @@ LETTER [a-zA-Z]
 /*sequence of one or more digits, can start with +/-, no size constraint*/
 INTCONST (\-|\+)?[0-9]+
 
-/*letter/underscore, then any number of letters / digits / underscores*/
-IDENT [A-Za-z_][A-Za-z0-9_]*
-
 /*a ' followed by a ' with stuff in between, or a " followed by " with the same stuff*/
 STRCONST \"[^\n]*\"|\'[^\n]*\'
 
 /* let*, if, lambda, print, input, and, or, not, t, nil */
-LETSTAR let\*/{AWSPACENLINE}
-IF if/{AWSPACENLINE}
-LAMBDA lambda/{AWSPACENLINE}
-PRINT print/{AWSPACENLINE}
-INPUT input/{AWSPACENLINE}
-AND and/{AWSPACENLINE}
-OR or/{AWSPACENLINE}
-NOT not/{AWSPACENLINE}
-T t/{AWSPACENLINE}
-NIL nil/{AWSPACENLINE}
+LETSTAR let\*
+IF if
+LAMBDA lambda
+PRINT print
+INPUT input
+AND and
+OR or
+NOT not
+T t
+NIL nil
 
 /* matches * / + - < > >= <= = /= *=  */
 ADD \+
@@ -85,14 +82,15 @@ GE >=
 EQ =
 NE \/=
 
-
 /* parenthesis */
 RPAREN \)
 LPAREN \(
 
-/* Comment, anything after ; */
+/*letter/underscore, then any number of letters / digits / underscores*/
+IDENT [A-Za-z_][A-Za-z0-9_]*
 
-COMMENT ;[^\n]*$
+/* Comment, anything after ; */
+COMMENT ;[^\n]*
 
 %%
 {NEWLINE}   {
@@ -105,11 +103,6 @@ COMMENT ;[^\n]*$
 {INTCONST}  {
               printTokenInfo("INTCONST", yytext);
               return T_INTCONST;
-            }
-
-{IDENT}     {
-              printTokenInfo("IDENT", yytext);
-              return T_IDENT;
             }
 
 {STRCONST}  {
@@ -230,6 +223,11 @@ COMMENT ;[^\n]*$
 {COMMENT}   {
               //printTokenInfo("COMMENT", yytext);
               return T_COMMENT;
+            }
+
+{IDENT}     {
+              printTokenInfo("IDENT", yytext);
+              return T_IDENT;
             }
 
 .           {
