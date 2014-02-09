@@ -164,32 +164,32 @@ COMMENT ;[^\n]*
             }
 
 {LT}        {
-              printTokenInfo( LT, yytext );
+              printTokenInfo( TOKEN_LT, yytext );
               return T_LT;
             }
 
 {GT}        {
-              printTokenInfo( GT, yytext );
+              printTokenInfo( TOKEN_GT, yytext );
               return T_GT;
             }
 
 {LE}        {
-              printTokenInfo( LE, yytext );
+              printTokenInfo( TOKEN_LE, yytext );
               return T_LE;
             }
 
 {GE}        {
-              printTokenInfo( GE, yytext );
+              printTokenInfo( TOKEN_GE, yytext );
               return T_GE;
             }
 
 {EQ}        {
-              printTokenInfo( EQ, yytext );
+              printTokenInfo( TOKEN_EQ, yytext );
               return T_EQ;
             }
 
 {NE}        {
-              printTokenInfo( NE, yytext );
+              printTokenInfo( TOKEN_NE, yytext );
               return T_NE;
             }
 
