@@ -302,7 +302,7 @@ N_BIN_OP:               N_ARITH_OP
                         }
                         | N_REL_OP
                         {
-                          printRule( REL_OP, BIN_OP );
+                          printRule( BIN_OP, REL_OP );
                         };
 
 N_ARITH_OP:             T_MULT
