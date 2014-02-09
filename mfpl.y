@@ -387,7 +387,7 @@ void vPrintRule( int num, ... )
     in = va_arg( args, int );
     if( in >= NUM_SYMBOLS || in < 0 )
     {
-      printf( "PARSE ERROR: Invalid symbol passed in with index: %i\n", in );
+      printf( "PARSE ERROR: Invalid symbol id passed in with index: %i\n", in );
       continue;
     }
     
