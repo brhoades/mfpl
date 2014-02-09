@@ -154,8 +154,8 @@ COMMENT ;[^\n]*
             }
 
 {MULT}      {
-              printTokenInfo( MULTI, yytext );
-              return T_MULTI;
+              printTokenInfo( MULT, yytext );
+              return T_MULT;
             }
 
 {DIV}       {

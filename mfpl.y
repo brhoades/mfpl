@@ -11,7 +11,8 @@
 
 int numLines = 0; 
 
-void printRule( int lhs, ... );
+void printRule( int, int );
+void vPrintRule( int, ... );
 int yyerror( const char *s );
 void printTokenInfo( int tokenType, const char* lexeme );
 const char* nameLookup( int token );
@@ -39,7 +40,7 @@ enum SYMBOLS
   PRINT,
   INPUT,
   ARITH_OP,
-  MULTI,
+  MULT,
   SUB,
   DIV,
   ADD,
@@ -89,7 +90,7 @@ const char* names[NUM_SYMBOLS] =
     "INTCONST",
     "STRCONST",
     "T",
-    "NIL",
+    "epsilon",
     "LETSTAR",
     "LAMBDA", 
     "PRINT",
@@ -138,7 +139,7 @@ extern "C"
 %}
 /* Token declarations */
 %token T_IDENT T_LPAREN T_RPAREN T_INTCONST T_STRCONST T_T T_NIL
-%token T_LETSTAR  T_LAMBDA T_PRINT T_INPUT T_ARITH_OP T_MULTI T_SUB T_DIV T_ADD 
+%token T_LETSTAR  T_LAMBDA T_PRINT T_INPUT T_ARITH_OP T_MULT T_SUB T_DIV T_ADD 
 %token T_AND T_OR T_LT T_GT T_LE T_GE T_EQ T_NE T_NOT T_IF
 
 %start N_START
@@ -212,68 +213,174 @@ N_PARENTHESIZED_EXPR:   N_ARITHLOGIC_EXPR
 
 N_ARITHLOGIC_EXPR:      N_UN_OP N_EXPR
                         {
-                          printRule( ARITHLOGIC_EXPR, UN_OP, EXPR );
+                          vPrintRule( 3, ARITHLOGIC_EXPR, UN_OP, EXPR );
                         }
                         | N_BIN_OP N_EXPR N_EXPR
                         {
-                          printRule( ARITHLOGIC_EXPR, BIN_OP, EXPR, EXPR );
+                          vPrintRule( 4, ARITHLOGIC_EXPR, BIN_OP, EXPR, EXPR );
                         };
                         
 N_IF_EXPR:              T_IF N_EXPR N_EXPR
                         {
-                          printRule( IF_EXPR, IF, EXPR, EXPR );
+                          vPrintRule( 3, IF_EXPR, IF, EXPR, EXPR );
                         };
 
-N_LET_EXPR:             T_LETSTAR T_LPAREN N_ID_EXPR_LIST T_RPAREN N_EXPR;
+N_LET_EXPR:             T_LETSTAR T_LPAREN N_ID_EXPR_LIST T_RPAREN N_EXPR
+                        {
+                          vPrintRule( 5, LET_EXPR, LETSTAR, LPAREN, ID_EXPR_LIST, 
+                                     RPAREN, EXPR );
+                        };
 
-N_ID_EXPR_LIST:         T_NIL;
+N_ID_EXPR_LIST:         T_NIL
+                        {
+                          printRule( ID_EXPR_LIST, NIL );
+                        }
+                        | N_ID_EXPR_LIST T_LPAREN N_ID_EXPR_LIST T_RPAREN N_EXPR
+                        {
+                          vPrintRule( 6, ID_EXPR_LIST, ID_EXPR_LIST, LPAREN, 
+                                      ID_EXPR_LIST, RPAREN, EXPR );
+                        };
 
-N_LAMBDA_EXPR:          T_NIL;
+N_LAMBDA_EXPR:          T_LAMBDA T_LPAREN N_ID_LIST T_RPAREN N_EXPR
+                        {
+                          vPrintRule( 6, LAMBDA_EXPR, LAMBDA, LPAREN, ID_LIST,
+                                      RPAREN, EXPR );
+                        };
 
-N_ID_LIST:              T_NIL;
+N_ID_LIST:              T_NIL
+                        {
+                          printRule( ID_LIST, NIL );
+                        }
+                        | N_ID_LIST T_IDENT
+                        {
+                          vPrintRule( 3, ID_LIST, ID_LIST, IDENT );
+                        };
 
-N_PRINT_EXPR:           T_NIL;
+N_PRINT_EXPR:           T_PRINT N_EXPR
+                        {
+                          
+                        };
 
-N_INPUT_EXPR:           T_NIL;
+N_INPUT_EXPR:           T_INPUT
+                        {
+                          
+                        };
 
-N_EXPR_LIST:            T_NIL;
+N_EXPR_LIST:            N_EXPR N_EXPR_LIST
+                        {
+                          
+                        }
+                        | N_EXPR
+                        {
+                          
+                        };
 
-N_BIN_OP:               T_NIL;
+N_BIN_OP:               N_ARITH_OP
+                        {
+                          
+                        }
+                        | N_LOG_OP
+                        {
+                          
+                        }
+                        | N_REL_OP
+                        {
+                          
+                        };
 
-N_ARITH_OP:             T_NIL;
+N_ARITH_OP:             T_MULT
+                        {
+                          
+                        }
+                        | T_SUB
+                        {
+                          
+                        }
+                        | T_DIV
+                        {
+                          
+                        }
+                        | T_ADD
+                        {
+                          
+                        };
 
-N_LOG_OP:               T_NIL;
+N_LOG_OP:               T_AND
+                        {
+                          
+                        }
+                        | T_OR
+                        {
+                          
+                        };
 
-N_REL_OP:               T_NIL;
+N_REL_OP:               T_LT
+                        {
+                          
+                        }
+                        | T_GT
+                        {
+                          
+                        }
+                        | T_LE
+                        {
+                          
+                        }
+                        | T_GE
+                        {
+                          
+                        }
+                        | T_EQ
+                        {
+                          
+                        }
+                        | T_NE
+                        {
+                          
+                        }
+                        T_NOT
+                        {
+                          
+                        };
 
-N_UN_OP:                T_NIL;
+N_UN_OP:                T_NOT
+                        {
+                          
+                        };
 
 %%
 
 #include "lex.yy.c"
 extern FILE *yyin;
 
-void printRule( int lhs, ... )
+void printRule( int lhs, int rhs )
 {
-  char* out = new char[8192];
+  printf( "%s -> %s\n", names[lhs] , names[rhs] );
+  return;
+}
+
+void vPrintRule( int num, ... )
+{
+  char out[8192];
   va_list args;
   int i;
   
+  //Handle our vargs
+  va_start( args, num );
+  
   //Base string
-  strcpy( out, names[lhs] );
+  strcpy( out, names[va_arg( args, int )] );
   strcat( out, " ->" );
   
-  va_start( args, lhs );
-  
-  for( i=1; i<sizeof(args); i++ )
+  for( i=1; i<num; i++ )
   {
     strcat( out, " " );
-    strcat( out, names[va_arg( args, int )] );
+    printf( "%i", va_arg( args, int ) );
+    strcat( out, names[i] );
   }
   
   strcat( out, "\n" );
-  
-  vprintf( out, args );
+  printf( out );
   va_end( args );
 }
 
