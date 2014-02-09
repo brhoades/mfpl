@@ -65,7 +65,7 @@ IDENT [A-Za-z_][A-Za-z0-9_]*
 /* Comment, anything after ; */
 COMMENT ;[^\n]*
 
-%%
+%%          
 {NEWLINE}   {
                numLines += 1 ;
             }
@@ -193,16 +193,14 @@ COMMENT ;[^\n]*
               return T_NE;
             }
 
-{COMMENT}   {
-              //printTokenInfo( COMMENT, yytext );
-              return T_COMMENT;
-            }
-
 {IDENT}     {
               printTokenInfo( IDENT, yytext );
               return T_IDENT;
             }
-
+            
+{COMMENT}   {
+            }
+            
 .           {
                printTokenInfo( UNKNOWN, yytext );
                return T_UNKNOWN;
