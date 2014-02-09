@@ -208,8 +208,7 @@ N_CONST:                T_INTCONST
                         | T_NIL
                         {
                           printRule( CONST, NIL );
-                        }
-                        ;
+                        };
 
 N_PARENTHESIZED_EXPR:   N_ARITHLOGIC_EXPR
                         {
@@ -264,10 +263,10 @@ N_ID_EXPR_LIST:         /* epsilon */
                         {
                           printRule( ID_EXPR_LIST, EPSILON );
                         }
-                        | N_ID_EXPR_LIST T_LPAREN N_ID_EXPR_LIST T_RPAREN N_EXPR
+                        | N_ID_EXPR_LIST T_LPAREN T_IDENT T_RPAREN N_EXPR
                         {
                           vPrintRule( 6, ID_EXPR_LIST, ID_EXPR_LIST, LPAREN, 
-                                      ID_EXPR_LIST, RPAREN, EXPR );
+                                      T_IDENT, RPAREN, EXPR );
                         };
 
 N_LAMBDA_EXPR:          T_LAMBDA T_LPAREN N_ID_LIST T_RPAREN N_EXPR
