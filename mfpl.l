@@ -144,22 +144,22 @@ COMMENT ;[^\n]*
             }
 
 {ADD}       {
-              printTokenInfo( ADD, yytext );
+              printTokenInfo( TOKEN_ADD, yytext );
               return T_ADD;
             }
 
 {SUB}       {
-              printTokenInfo( SUB, yytext );
+              printTokenInfo( TOKEN_SUB, yytext );
               return T_SUB;
             }
 
 {MULT}      {
-              printTokenInfo( MULT, yytext );
+              printTokenInfo( TOKEN_MULT, yytext );
               return T_MULT;
             }
 
 {DIV}       {
-              printTokenInfo( DIV, yytext );
+              printTokenInfo( TOKEN_DIV, yytext );
               return T_DIV;
             }
 
