@@ -263,10 +263,10 @@ N_ID_EXPR_LIST:         /* epsilon */
                         {
                           printRule( ID_EXPR_LIST, EPSILON );
                         }
-                        | N_ID_EXPR_LIST T_LPAREN T_IDENT T_RPAREN N_EXPR
+                        | N_ID_EXPR_LIST T_LPAREN T_IDENT N_EXPR T_RPAREN
                         {
                           vPrintRule( 6, ID_EXPR_LIST, ID_EXPR_LIST, LPAREN, 
-                                      T_IDENT, RPAREN, EXPR );
+                                      IDENT, EXPR, RPAREN );
                         };
 
 N_LAMBDA_EXPR:          T_LAMBDA T_LPAREN N_ID_LIST T_RPAREN N_EXPR

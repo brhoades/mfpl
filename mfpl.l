@@ -72,12 +72,20 @@ COMMENT ;[^\n]*
 
 {WSPACE}    {
             }
-
+            
+{COMMENT}   {
+            }
+            
 {INTCONST}  {
               printTokenInfo( INTCONST, yytext );
               return T_INTCONST;
             }
 
+{T}         {
+              printTokenInfo( T, yytext );
+              return T_T;
+            }
+            
 {STRCONST}  {
               printTokenInfo( STRCONST, yytext );
               return T_STRCONST;
@@ -121,11 +129,6 @@ COMMENT ;[^\n]*
 {NOT}       {
               printTokenInfo( NOT, yytext );
               return T_NOT;
-            }
-
-{T}         {
-              printTokenInfo( T, yytext );
-              return T_T;
             }
 
 {NIL}       {
@@ -196,9 +199,6 @@ COMMENT ;[^\n]*
 {IDENT}     {
               printTokenInfo( IDENT, yytext );
               return T_IDENT;
-            }
-            
-{COMMENT}   {
             }
             
 .           {
