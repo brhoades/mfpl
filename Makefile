@@ -1,12 +1,13 @@
 all: main
 
-main: lex.yy.c mfpl_lexer
+main: mfpl_parser
 
-lex.yy.c: mfpl.l
+lex.tab.c:
+	bison mfpl.y
 	lex mfpl.l
 
-mfpl_lexer: lex.yy.c
-	g++ lex.yy.c -o mfpl_lexer
+mfpl_parser: lex.tab.c
+	g++ mfpl.tab.c -o mfpl_parser
 
 clean: 
-	rm *.yy.c mfpl_lexer
+	rm *.tab.c *.yy.c mfpl_parser &> /dev/null | :
