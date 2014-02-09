@@ -220,14 +220,14 @@ N_ARITHLOGIC_EXPR:      N_UN_OP N_EXPR
                           vPrintRule( 4, ARITHLOGIC_EXPR, BIN_OP, EXPR, EXPR );
                         };
                         
-N_IF_EXPR:              T_IF N_EXPR N_EXPR
+N_IF_EXPR:              T_IF N_EXPR N_EXPR N_EXPR
                         {
-                          vPrintRule( 3, IF_EXPR, IF, EXPR, EXPR );
+                          vPrintRule( 4, IF_EXPR, IF, EXPR, EXPR );
                         };
 
 N_LET_EXPR:             T_LETSTAR T_LPAREN N_ID_EXPR_LIST T_RPAREN N_EXPR
                         {
-                          vPrintRule( 5, LET_EXPR, LETSTAR, LPAREN, ID_EXPR_LIST, 
+                          vPrintRule( 6, LET_EXPR, LETSTAR, LPAREN, ID_EXPR_LIST, 
                                      RPAREN, EXPR );
                         };
 
@@ -359,7 +359,7 @@ void vPrintRule( int num, ... )
 {
   char out[8192];
   va_list args;
-  int i;
+  int i, in;
   
   //Handle our vargs
   va_start( args, num );
@@ -370,8 +370,15 @@ void vPrintRule( int num, ... )
   
   for( i=1; i<num; i++ )
   {
+    in = va_arg( args, int );
+    if( in >= NUM_SYMBOLS || in < 0 )
+    {
+      printf( "PARSE ERROR: Invalid symbol passed in with index: %i\n", in );
+      continue;
+    }
+    
     strcat( out, " "  );
-    strcat( out, names[va_arg( args, int )] );
+    strcat( out, names[in] );
   }
   
   strcat( out, "\n" );
