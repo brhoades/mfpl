@@ -179,7 +179,11 @@ N_EXPR:                 N_CONST
                           vPrintRule( 4, EXPR, LPAREN, PARENTHESIZED_EXPR, RPAREN );
                         };
                
-N_CONST:                T_INTCONST
+N_CONST:                /* epsilon */
+                        {
+                          printRule( CONST, NIL );
+                        }
+                        T_INTCONST
                         {
                           printRule( CONST, INTCONST );
                         }
@@ -190,10 +194,6 @@ N_CONST:                T_INTCONST
                         | T_T
                         {
                           printRule( CONST, T );
-                        }
-                        | T_NIL
-                        {
-                          printRule( CONST, NIL );
                         };
 
 N_PARENTHESIZED_EXPR:   N_ARITHLOGIC_EXPR
@@ -245,7 +245,7 @@ N_LET_EXPR:             T_LETSTAR T_LPAREN N_ID_EXPR_LIST T_RPAREN N_EXPR
                                      RPAREN, EXPR );
                         };
 
-N_ID_EXPR_LIST:         T_NIL
+N_ID_EXPR_LIST:         /* epsilon */
                         {
                           printRule( ID_EXPR_LIST, NIL );
                         }
@@ -261,7 +261,7 @@ N_LAMBDA_EXPR:          T_LAMBDA T_LPAREN N_ID_LIST T_RPAREN N_EXPR
                                       RPAREN, EXPR );
                         };
 
-N_ID_LIST:              T_NIL
+N_ID_LIST:              /* epsilon */
                         {
                           printRule( ID_LIST, NIL );
                         }
