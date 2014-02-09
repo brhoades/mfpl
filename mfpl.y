@@ -15,6 +15,9 @@ int yyerror( const char *s );
 void printTokenInfo( int tokenType, const char* lexeme );
 const char* nameLookup( int token );
 
+//Symbols enum that we use when printing out symbol information.
+//This way when small formatting changes are made I only need to update
+//the corresponding entry in the namea array.
 enum SYMBOLS
 {
   //Carryovers from lex
@@ -132,16 +135,12 @@ extern "C"
 }
 
 %}
-//N_EXPR N_CONST N_PARENTHESIZED_EXPR N_ARITHLOGIC_EXPR N_IF_EXPR N_LET_EXPR 
-//N_LAMBDA_EXPR N_PRINT_EXPR N_INPUT_EXPR N_EXPR_LIST N_UN_OP N_BIN_OP
-//N_ID_EXPR_LIST N_ID_LIST N_LOG_OP N_REL_OP
-
 /* Token declarations */
 %token T_IDENT T_LPAREN T_RPAREN T_INTCONST T_STRCONST T_T T_NIL
 %token T_LETSTAR  T_LAMBDA T_PRINT T_INPUT T_ARITH_OP T_MULTI T_SUB T_DIV T_ADD 
 %token T_AND T_OR T_LT T_GT T_LE T_GE T_EQ T_NE T_NOT
 
-%start          N_START
+%start N_START
 
 %%
 N_START:                N_EXPR
@@ -166,22 +165,51 @@ N_EXPR:                 N_CONST
                
 N_CONST:                T_INTCONST
                         {
-                          
+                          printRule( CONST, INTCONST );
                         }
                         | T_STRCONST
                         {
-                          
+                          printRule( CONST, STRCONST );
                         }
                         | T_T
                         {
-                          
+                          printRule( CONST, T );
                         }
                         | T_NIL
                         {
-                          
+                          printRule( CONST, NIL );
                         };
 
 N_PARENTHESIZED_EXPR:   T_NIL;
+
+N_ARITHLOGIC_EXPR:      T_NIL;
+
+N_IF_EXPR:              T_NIL;
+
+N_LET_EXPR:             T_NIL;
+
+N_ID_EXPR_LIST:         T_NIL;
+
+N_LAMBDA_EXPR:          T_NIL;
+
+N_ID_LIST:              T_NIL;
+
+N_PRINT_EXPR:           T_NIL;
+
+N_INPUT_EXPR:           T_NIL;
+
+N_EXPR_LIST:            T_NIL;
+
+N_BIN_OP:               T_NIL;
+
+N_ARITH_OP:             T_NIL;
+
+N_LOG_OP:               T_NIL;
+
+N_REL_OP:               T_NIL;
+
+N_UN_OP:                T_NIL;
+
 %%
 
 #include "lex.yy.c"
