@@ -162,7 +162,7 @@ extern "C"
 N_START:                N_EXPR
                         {
                           printRule( START, EXPR );
-                          printf( "\n-- Completed parsing --\n\n" );
+                          printf( "\n---- Completed parsing ----\n\n" );
                           //good = 1;
                           
                           return 0;
