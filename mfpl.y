@@ -374,9 +374,8 @@ void vPrintRule( int num, ... )
   
   for( i=1; i<num; i++ )
   {
-    strcat( out, " " );
-    printf( "%i", va_arg( args, int ) );
-    strcat( out, names[i] );
+    strcat( out, " "  );
+    strcat( out, names[va_arg( args, int )] );
   }
   
   strcat( out, "\n" );
