@@ -222,7 +222,7 @@ N_ARITHLOGIC_EXPR:      N_UN_OP N_EXPR
                         
 N_IF_EXPR:              T_IF N_EXPR N_EXPR N_EXPR
                         {
-                          vPrintRule( 4, IF_EXPR, IF, EXPR, EXPR );
+                          vPrintRule( 5, IF_EXPR, IF, EXPR, EXPR, EXPR );
                         };
 
 N_LET_EXPR:             T_LETSTAR T_LPAREN N_ID_EXPR_LIST T_RPAREN N_EXPR
@@ -268,11 +268,11 @@ N_INPUT_EXPR:           T_INPUT
 
 N_EXPR_LIST:            N_EXPR N_EXPR_LIST
                         {
-                          vPrintRule( EXPR_LIST, EXPR, EXPR_LIST );
+                          vPrintRule( 3, EXPR_LIST, EXPR, EXPR_LIST );
                         }
                         | N_EXPR
                         {
-                          vPrintRule( EXPR_LIST, EXPR );
+                          vPrintRule( 2, EXPR_LIST, EXPR );
                         };
 
 N_BIN_OP:               N_ARITH_OP
