@@ -1,10 +1,9 @@
-/* mfpl.l
- * Flex Homework #1
- * Billy Rhoades <bjrq48@mst.edu>
- * 12352623
- *
- *
-*/
+/* 
+ * Billy J Rhoades <bjrq48@mst.edu>
+ * CS256 Programming Languages and Translators 
+ * Section 1A
+ * Homework 2
+ */
 
 %{
  //Constants
