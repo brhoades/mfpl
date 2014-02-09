@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-int numLines = 0; 
+int numLines = 0, good = 0; 
 
 void printRule( int, int );
 void vPrintRule( int, ... );
@@ -161,6 +161,8 @@ N_START:                N_EXPR
                         {
                           printRule( START, EXPR );
                           printf( "\n-- Completed parsing --\n\n" );
+                          good = 1;
+                          
                           return 0;
                         };
                         
@@ -400,13 +402,14 @@ void vPrintRule( int num, ... )
 
 int yyerror( const char *s )
 {
-  printf( "%s\n", s );
-  return( 1 );
+  printf( "Line %i: %s\n", numLines+1, s );
+
+  return 1;
 }
 
 void printTokenInfo( int tokenType, const char* lexeme )
 {
-  printf( "TOKEN: %s\t\tLEXEME: %s\n", names[tokenType], lexeme );
+  printf( "TOKEN: %s\tLEXEME: %s\n", names[tokenType], lexeme );
 }
 
 int main( )
@@ -416,7 +419,9 @@ int main( )
     yyparse();
   } 
   while( !feof( yyin ) );
-
-  printf( "%d lines processed\n", numLines );
+  
+  if( good )
+    printf( "%d lines processed\n", numLines );
+  
   return 0;
 }
