@@ -37,6 +37,7 @@ enum SYMBOLS
   STRCONST,
   T,
   NIL, 
+  EPSILON,
   LETSTAR,
   LAMBDA,
   PRINT,
@@ -98,6 +99,7 @@ const char* names[NUM_SYMBOLS] =
     "INTCONST",
     "STRCONST",
     "T",
+    "NIL",
     "epsilon",
     "LETSTAR",
     "LAMBDA", 
@@ -179,11 +181,7 @@ N_EXPR:                 N_CONST
                           vPrintRule( 4, EXPR, LPAREN, PARENTHESIZED_EXPR, RPAREN );
                         };
                
-N_CONST:                /* epsilon */
-                        {
-                          printRule( CONST, NIL );
-                        }
-                        T_INTCONST
+N_CONST:                T_INTCONST
                         {
                           printRule( CONST, INTCONST );
                         }
@@ -194,7 +192,12 @@ N_CONST:                /* epsilon */
                         | T_T
                         {
                           printRule( CONST, T );
-                        };
+                        }
+                        | T_NIL
+                        {
+                          printRule( CONST, NIL );
+                        }
+                        ;
 
 N_PARENTHESIZED_EXPR:   N_ARITHLOGIC_EXPR
                         {
@@ -247,7 +250,7 @@ N_LET_EXPR:             T_LETSTAR T_LPAREN N_ID_EXPR_LIST T_RPAREN N_EXPR
 
 N_ID_EXPR_LIST:         /* epsilon */
                         {
-                          printRule( ID_EXPR_LIST, NIL );
+                          printRule( ID_EXPR_LIST, EPSILON );
                         }
                         | N_ID_EXPR_LIST T_LPAREN N_ID_EXPR_LIST T_RPAREN N_EXPR
                         {
