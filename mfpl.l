@@ -11,37 +11,12 @@
   typedef enum
   {
     RESERVED,   //reserved by lex
-    T_INTCONST,
-    T_STRCONST,
-    T_LETSTAR,
     T_IF,
-    T_LAMBDA,
-    T_PRINT,
-    T_INPUT,
-    T_AND,
-    T_OR,
-    T_NOT,
-    T_T,
-    T_NIL,
-    T_ADD,
-    T_SUB,
-    T_MULT,
-    T_DIV,
-    T_LT,
-    T_GT,
-    T_LE,
-    T_GE,
-    T_EQ,
-    T_NE,
-    T_RPAREN,
-    T_LPAREN,
     T_COMMENT,
-    T_IDENT,
     T_UNKNOWN
 
   } TYPE;
  
-  int numLines = 0;
   void printTokenInfo( const char* tokenTypem, const char* lexeme );
 %}
 
@@ -180,8 +155,8 @@ COMMENT ;[^\n]*
             }
 
 {MULT}      {
-              printTokenInfo("MULT", yytext);
-              return T_MULT;
+              printTokenInfo("MULTI", yytext);
+              return T_MULTI;
             }
 
 {DIV}       {
@@ -235,21 +210,3 @@ COMMENT ;[^\n]*
             }
 
 %%
-
-int yywrap( )
-{
-  return 1; // one file is taken in
-}
-
-void printTokenInfo( const char* tokenType, const char* lexeme )
-{
-  printf( "TOKEN: %s\tLEXEME: %s\n", tokenType, lexeme );
-}
-
-int main( )
-{
-  while( yylex( ) );
-  //printf( "Processed %d lines\n", numLines );
-
-  return 0;
-}
