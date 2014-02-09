@@ -11,7 +11,6 @@
   typedef enum
   {
     RESERVED,   //reserved by lex
-    T_IF,
     T_COMMENT,
     T_UNKNOWN
 

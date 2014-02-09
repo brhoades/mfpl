@@ -11,6 +11,9 @@
 int numLines = 0; 
 
 void printRule( int lhs, int rhs );
+void printRule( int, int, int );
+void printRule( int, int, int, int );
+void printRule( int, int, int, int, int );
 int yyerror( const char *s );
 void printTokenInfo( int tokenType, const char* lexeme );
 const char* nameLookup( int token );
@@ -138,7 +141,7 @@ extern "C"
 /* Token declarations */
 %token T_IDENT T_LPAREN T_RPAREN T_INTCONST T_STRCONST T_T T_NIL
 %token T_LETSTAR  T_LAMBDA T_PRINT T_INPUT T_ARITH_OP T_MULTI T_SUB T_DIV T_ADD 
-%token T_AND T_OR T_LT T_GT T_LE T_GE T_EQ T_NE T_NOT
+%token T_AND T_OR T_LT T_GT T_LE T_GE T_EQ T_NE T_NOT T_IF
 
 %start N_START
 
@@ -180,11 +183,48 @@ N_CONST:                T_INTCONST
                           printRule( CONST, NIL );
                         };
 
-N_PARENTHESIZED_EXPR:   T_NIL;
+N_PARENTHESIZED_EXPR:   N_ARITHLOGIC_EXPR
+                        {
+                          printRule( PARENTHESIZED_EXPR, ARITHLOGIC_EXPR );
+                        }
+                        | N_IF_EXPR
+                        {
+                          printRule( PARENTHESIZED_EXPR, IF_EXPR );
+                        }
+                        | N_LET_EXPR
+                        {
+                          printRule( PARENTHESIZED_EXPR, LET_EXPR );
+                        }
+                        | N_LAMBDA_EXPR
+                        {
+                          printRule( PARENTHESIZED_EXPR, LAMBDA_EXPR );
+                        }
+                        | N_PRINT_EXPR
+                        {
+                          printRule( PARENTHESIZED_EXPR, PRINT_EXPR );
+                        }
+                        | N_INPUT_EXPR
+                        {
+                          printRule( PARENTHESIZED_EXPR, INPUT_EXPR );
+                        }
+                        | N_EXPR_LIST
+                        {
+                          printRule( PARENTHESIZED_EXPR, EXPR_LIST );
+                        };
 
-N_ARITHLOGIC_EXPR:      T_NIL;
-
-N_IF_EXPR:              T_NIL;
+N_ARITHLOGIC_EXPR:      N_UN_OP N_EXPR
+                        {
+                          printRule( ARITHLOGIC_EXPR, UN_OP, EXPR );
+                        }
+                        | N_BIN_OP N_EXPR N_EXPR
+                        {
+                          printRule( ARITHLOGIC_EXPR, BIN_OP, EXPR, EXPR );
+                        };
+                        
+N_IF_EXPR:              T_IF N_EXPR N_EXPR
+                        {
+                          printRule( IF_EXPR, IF, EXPR, EXPR );
+                        };
 
 N_LET_EXPR:             T_NIL;
 
@@ -215,9 +255,29 @@ N_UN_OP:                T_NIL;
 #include "lex.yy.c"
 extern FILE *yyin;
 
+//later: vargs
+
 void printRule( int lhs, int rhs )
 {
   printf( "%s -> %s\n", names[lhs] , names[rhs] );
+  return;
+}
+
+void printRule( int lhs, int rhs, int rhs2 )
+{
+  printf( "%s -> %s %s\n", names[lhs] , names[rhs], names[rhs2] );
+  return;
+}
+
+void printRule( int lhs, int rhs, int rhs2, int rhs3 )
+{
+  printf( "%s -> %s %s %s\n", names[lhs] , names[rhs], names[rhs2], names[rhs3] );
+  return;
+}
+
+void printRule( int lhs, int rhs, int rhs2, int rhs3, int rhs4 )
+{
+  printf( "%s -> %s %s %s\n", names[lhs] , names[rhs], names[rhs2], names[rhs3], names[rhs4] );
   return;
 }
 
