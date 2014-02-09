@@ -10,9 +10,105 @@
 
 int numLines = 0; 
 
-void printRule( const char *lhs, const char *rhs );
+void printRule( int lhs, int rhs );
 int yyerror( const char *s );
 void printTokenInfo( const char* tokenType, const char* lexeme );
+const char* nameLookup( int token );
+
+enum SYMBOLS
+{
+  START,
+  IDENT,
+  LPAREN,
+  RPAREN,
+  INTCONST,
+  STRCONST,
+  T,
+  NIL, 
+  LETSTAR,
+  LAMBDA,
+  PRINT,
+  INPUT,
+  ARITH_OP,
+  MULTI,
+  SUB,
+  DIV,
+  ADD,
+  AND,
+  OR,
+  LT,
+  GT,
+  LE,
+  GE,
+  EQ,
+  NE,
+  NOT,
+  EXPR,
+  CONST,
+  PARENTHESIZED_EXPR,
+  ARITHLOGIC_EXPR,
+  IF_EXPR,
+  LET_EXPR,
+  LAMBDA_EXPR,
+  PRINT_EXPR,
+  INPUT_EXPR,
+  EXPR_LIST,
+  UN_OP,
+  BIN_OP,
+  ID_EXPR_LIST,
+  ID_LIST,
+  LOG_OP,
+  REL_OP,
+  
+  NUM_SYMBOLS
+  
+};
+
+const char* names[NUM_SYMBOLS] = 
+  {
+    "START",
+    "IDENT",
+    "LPAREN",
+    "RPAREN",
+    "INTCONST",
+    "STRCONST",
+    "T",
+    "NIL",
+    "LETSTAR",
+    "LAMBDA", 
+    "PRINT",
+    "INPUT",
+    "ARITH_OP",
+    "MULTI",
+    "SUB",
+    "DIV",
+    "ADD",
+    "AND",
+    "OR",
+    "LT",
+    "GT",
+    "LE",
+    "GE",
+    "EQ",
+    "NE",
+    "NOT",
+    "EXPR",
+    "CONST",
+    "( PARENTHESIZED_EXPR )",
+    "ARITHLOGIC_EXPR",
+    "IF_EXPR",
+    "LET_EXPR",
+    "LAMBDA_EXPR",
+    "PRINT_EXPR",
+    "INPUT_EXPR",
+    "EXPR_LIST",
+    "UN_OP",
+    "BIN_OP",
+    "ID_EXPR_LIST",
+    "ID_LIST",
+    "LOG_OP",
+    "REL_OP"
+  };
 
 extern "C"
 {
@@ -36,22 +132,22 @@ extern "C"
 %%
 N_START:                N_EXPR
                         {
-                          printRule( "START", "EXPR" );
+                          printRule( START, EXPR );
                           printf( "\n-- Completed parsing --\n\n" );
                           return 0;
                         };
                         
 N_EXPR:                 N_CONST
                         {
-                          printRule( "EXPR", "CONST" );
+                          printRule( EXPR, CONST );
                         }
                         | T_IDENT
                         {
-                          printRule( "EXPR", "IDENT" );
+                          printRule( EXPR, IDENT );
                         }
                         | T_LPAREN N_PARENTHESIZED_EXPR T_RPAREN
                         {
-                          printRule( "EXPR", "( PARENTHESIZED_EXPR )" );
+                          printRule( EXPR, PARENTHESIZED_EXPR );
                         };
                
 N_CONST:                T_INTCONST
@@ -77,9 +173,9 @@ N_PARENTHESIZED_EXPR:   T_NIL;
 #include "lex.yy.c"
 extern FILE *yyin;
 
-void printRule( const char *lhs, const char *rhs )
+void printRule( int lhs, int rhs )
 {
-  printf( "%s -> %s\n", lhs, rhs );
+  printf( "%s -> %s\n", names[lhs] , names[rhs] );
   return;
 }
 
