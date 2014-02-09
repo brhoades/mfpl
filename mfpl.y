@@ -7,13 +7,11 @@
 
 %{
 #include <stdio.h>
+#include <stdarg.h>
 
 int numLines = 0; 
 
-void printRule( int lhs, int rhs );
-void printRule( int, int, int );
-void printRule( int, int, int, int );
-void printRule( int, int, int, int, int );
+void printRule( int lhs, ... );
 int yyerror( const char *s );
 void printTokenInfo( int tokenType, const char* lexeme );
 const char* nameLookup( int token );
@@ -226,7 +224,7 @@ N_IF_EXPR:              T_IF N_EXPR N_EXPR
                           printRule( IF_EXPR, IF, EXPR, EXPR );
                         };
 
-N_LET_EXPR:             T_NIL;
+N_LET_EXPR:             T_LETSTAR T_LPAREN N_ID_EXPR_LIST T_RPAREN N_EXPR;
 
 N_ID_EXPR_LIST:         T_NIL;
 
@@ -255,30 +253,28 @@ N_UN_OP:                T_NIL;
 #include "lex.yy.c"
 extern FILE *yyin;
 
-//later: vargs
-
-void printRule( int lhs, int rhs )
+void printRule( int lhs, ... )
 {
-  printf( "%s -> %s\n", names[lhs] , names[rhs] );
-  return;
-}
-
-void printRule( int lhs, int rhs, int rhs2 )
-{
-  printf( "%s -> %s %s\n", names[lhs] , names[rhs], names[rhs2] );
-  return;
-}
-
-void printRule( int lhs, int rhs, int rhs2, int rhs3 )
-{
-  printf( "%s -> %s %s %s\n", names[lhs] , names[rhs], names[rhs2], names[rhs3] );
-  return;
-}
-
-void printRule( int lhs, int rhs, int rhs2, int rhs3, int rhs4 )
-{
-  printf( "%s -> %s %s %s\n", names[lhs] , names[rhs], names[rhs2], names[rhs3], names[rhs4] );
-  return;
+  char* out = new char[8192];
+  va_list args;
+  int i;
+  
+  //Base string
+  strcpy( out, names[lhs] );
+  strcat( out, " ->" );
+  
+  va_start( args, lhs );
+  
+  for( i=1; i<sizeof(args); i++ )
+  {
+    strcat( out, " " );
+    strcat( out, names[va_arg( args, int )] );
+  }
+  
+  strcat( out, "\n" );
+  
+  vprintf( out, args );
+  va_end( args );
 }
 
 int yyerror( const char *s )
