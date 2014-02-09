@@ -31,6 +31,8 @@ enum SYMBOLS
   IDENT,
   LPAREN,
   RPAREN,
+  TOKEN_LPAREN,
+  TOKEN_RPAREN,
   INTCONST,
   STRCONST,
   T,
@@ -85,6 +87,8 @@ const char* names[NUM_SYMBOLS] =
     //Terminals
     "START",
     "IDENT",
+    "(",
+    ")",
     "LPAREN",
     "RPAREN",
     "INTCONST",
@@ -113,7 +117,7 @@ const char* names[NUM_SYMBOLS] =
     "CONST",
     
     // Nonterminals
-    "( PARENTHESIZED_EXPR )",
+    "PARENTHESIZED_EXPR",
     "ARITHLOGIC_EXPR",
     "IF_EXPR",
     "LET_EXPR",
@@ -162,7 +166,7 @@ N_EXPR:                 N_CONST
                         }
                         | T_LPAREN N_PARENTHESIZED_EXPR T_RPAREN
                         {
-                          printRule( EXPR, PARENTHESIZED_EXPR );
+                          vPrintRule( 4, EXPR, LPAREN, PARENTHESIZED_EXPR, RPAREN );
                         };
                
 N_CONST:                T_INTCONST
@@ -394,7 +398,7 @@ int yyerror( const char *s )
 
 void printTokenInfo( int tokenType, const char* lexeme )
 {
-  printf( "TOKEN: %s  LEXEME: %s\n", names[tokenType], lexeme );
+  printf( "TOKEN: %s\t\tLEXEME: %s\n", names[tokenType], lexeme );
 }
 
 int main( )

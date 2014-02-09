@@ -134,12 +134,12 @@ COMMENT ;[^\n]*
             }
 
 {RPAREN}    {
-              printTokenInfo( RPAREN, yytext );
+              printTokenInfo( TOKEN_RPAREN, yytext );
               return T_RPAREN;
             }
 
 {LPAREN}    {
-              printTokenInfo( LPAREN, yytext );
+              printTokenInfo( TOKEN_LPAREN, yytext );
               return T_LPAREN;
             }
 
