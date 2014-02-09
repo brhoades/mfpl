@@ -12,11 +12,16 @@ int numLines = 0;
 
 void printRule( int lhs, int rhs );
 int yyerror( const char *s );
-void printTokenInfo( const char* tokenType, const char* lexeme );
+void printTokenInfo( int tokenType, const char* lexeme );
 const char* nameLookup( int token );
 
 enum SYMBOLS
 {
+  //Carryovers from lex
+  IF,
+  UNKNOWN,
+  
+  // Terminals
   START,
   IDENT,
   LPAREN,
@@ -45,6 +50,8 @@ enum SYMBOLS
   NOT,
   EXPR,
   CONST,
+  
+  // Nonterminals
   PARENTHESIZED_EXPR,
   ARITHLOGIC_EXPR,
   IF_EXPR,
@@ -66,6 +73,11 @@ enum SYMBOLS
 
 const char* names[NUM_SYMBOLS] = 
   {
+    //Carryovers from lex
+    "IF",
+    "UNKNOWN",
+    
+    //Terminals
     "START",
     "IDENT",
     "LPAREN",
@@ -94,6 +106,8 @@ const char* names[NUM_SYMBOLS] =
     "NOT",
     "EXPR",
     "CONST",
+    
+    // Nonterminals
     "( PARENTHESIZED_EXPR )",
     "ARITHLOGIC_EXPR",
     "IF_EXPR",
@@ -185,7 +199,7 @@ int yyerror( const char *s )
   return( 1 );
 }
 
-void printTokenInfo( const char* tokenType, const char* lexeme )
+void printTokenInfo( int tokenType, const char* lexeme )
 {
   printf( "TOKEN: %s  LEXEME: %s\n", tokenType, lexeme );
 }

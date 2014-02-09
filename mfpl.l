@@ -17,7 +17,7 @@
 
   } TYPE;
  
-  void printTokenInfo( const char* tokenTypem, const char* lexeme );
+  void printTokenInfo(  int tokenType, const char* lexeme );
 %}
 
 NEWLINE \n
@@ -75,137 +75,137 @@ COMMENT ;[^\n]*
             }
 
 {INTCONST}  {
-              printTokenInfo("INTCONST", yytext);
+              printTokenInfo( INTCONST, yytext );
               return T_INTCONST;
             }
 
 {STRCONST}  {
-              printTokenInfo("STRCONST", yytext);
+              printTokenInfo( STRCONST, yytext );
               return T_STRCONST;
             }
 
 {LETSTAR}   {
-              printTokenInfo("LETSTAR", yytext);
+              printTokenInfo( LETSTAR, yytext );
               return T_LETSTAR;
             }
 
 {IF}        {
-              printTokenInfo("IF", yytext);
+              printTokenInfo( IF, yytext );
               return T_IF;
             }
 
 {LAMBDA}    {
-              printTokenInfo("LAMBDA", yytext);
+              printTokenInfo( LAMBDA, yytext );
               return T_LAMBDA;
             }
 
 {PRINT}     {
-              printTokenInfo("PRINT", yytext);
+              printTokenInfo( PRINT, yytext );
               return T_PRINT;
             }
 
 {INPUT}     {
-              printTokenInfo("INPUT", yytext);
+              printTokenInfo( INPUT, yytext );
               return T_INPUT;
             }
 
 {AND}       {
-              printTokenInfo("AND", yytext);
+              printTokenInfo( AND, yytext );
               return T_AND;
             }
 
 {OR}        {
-              printTokenInfo("OR", yytext);
+              printTokenInfo( OR, yytext );
               return T_OR;
             }
 
 {NOT}       {
-              printTokenInfo("NOT", yytext);
+              printTokenInfo( NOT, yytext );
               return T_NOT;
             }
 
 {T}         {
-              printTokenInfo("T", yytext);
+              printTokenInfo( T, yytext );
               return T_T;
             }
 
 {NIL}       {
-              printTokenInfo("NIL", yytext);
+              printTokenInfo( NIL, yytext );
               return T_NIL;
             }
 
 {RPAREN}    {
-              printTokenInfo("RPAREN", yytext);
+              printTokenInfo( RPAREN, yytext );
               return T_RPAREN;
             }
 
 {LPAREN}    {
-              printTokenInfo("LPAREN", yytext);
+              printTokenInfo( LPAREN, yytext );
               return T_LPAREN;
             }
 
 {ADD}       {
-              printTokenInfo("ADD", yytext);
+              printTokenInfo( ADD, yytext );
               return T_ADD;
             }
 
 {SUB}       {
-              printTokenInfo("SUB", yytext);
+              printTokenInfo( SUB, yytext );
               return T_SUB;
             }
 
 {MULT}      {
-              printTokenInfo("MULTI", yytext);
+              printTokenInfo( MULTI, yytext );
               return T_MULTI;
             }
 
 {DIV}       {
-              printTokenInfo("DIV", yytext);
+              printTokenInfo( DIV, yytext );
               return T_DIV;
             }
 
 {LT}        {
-              printTokenInfo("LT", yytext);
+              printTokenInfo( LT, yytext );
               return T_LT;
             }
 
 {GT}        {
-              printTokenInfo("GT", yytext);
+              printTokenInfo( GT, yytext );
               return T_GT;
             }
 
 {LE}        {
-              printTokenInfo("LE", yytext);
+              printTokenInfo( LE, yytext );
               return T_LE;
             }
 
 {GE}        {
-              printTokenInfo("GE", yytext);
+              printTokenInfo( GE, yytext );
               return T_GE;
             }
 
 {EQ}        {
-              printTokenInfo("EQ", yytext);
+              printTokenInfo( EQ, yytext );
               return T_EQ;
             }
 
 {NE}        {
-              printTokenInfo("NE", yytext);
+              printTokenInfo( NE, yytext );
               return T_NE;
             }
 
 {COMMENT}   {
-              //printTokenInfo("COMMENT", yytext);
+              //printTokenInfo( COMMENT, yytext );
               return T_COMMENT;
             }
 
 {IDENT}     {
-              printTokenInfo("IDENT", yytext);
+              printTokenInfo( IDENT, yytext );
               return T_IDENT;
             }
 
 .           {
-               printTokenInfo("UNKNOWN", yytext);
+               printTokenInfo( UNKNOWN, yytext );
                return T_UNKNOWN;
             }
 
