@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 
-int numLines = 0, good = 0; 
+int numLines = 0;// good = 0; 
 
 void printRule( int, int );
 void vPrintRule( int, ... );
@@ -163,7 +163,7 @@ N_START:                N_EXPR
                         {
                           printRule( START, EXPR );
                           printf( "\n-- Completed parsing --\n\n" );
-                          good = 1;
+                          //good = 1;
                           
                           return 0;
                         };
@@ -289,7 +289,7 @@ N_EXPR_LIST:            N_EXPR N_EXPR_LIST
                         }
                         | N_EXPR
                         {
-                          vPrintRule( 2, EXPR_LIST, EXPR );
+                          printRule( EXPR_LIST, EXPR );
                         };
 
 N_BIN_OP:               N_ARITH_OP
@@ -423,8 +423,8 @@ int main( )
   } 
   while( !feof( yyin ) );
   
-  if( good )
-    printf( "%d lines processed\n", numLines );
+  //if( good )
+  //  printf( "%d lines processed\n", numLines );
   
   return 0;
 }
