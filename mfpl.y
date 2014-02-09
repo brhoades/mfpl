@@ -258,94 +258,90 @@ N_ID_LIST:              T_NIL
 
 N_PRINT_EXPR:           T_PRINT N_EXPR
                         {
-                          
+                          vPrintRule( 3, PRINT_EXPR, PRINT, EXPR );
                         };
 
 N_INPUT_EXPR:           T_INPUT
                         {
-                          
+                          printRule( INPUT_EXPR, INPUT );
                         };
 
 N_EXPR_LIST:            N_EXPR N_EXPR_LIST
                         {
-                          
+                          vPrintRule( EXPR_LIST, EXPR, EXPR_LIST );
                         }
                         | N_EXPR
                         {
-                          
+                          vPrintRule( EXPR_LIST, EXPR );
                         };
 
 N_BIN_OP:               N_ARITH_OP
                         {
-                          
+                          printRule( BIN_OP, ARITH_OP );
                         }
                         | N_LOG_OP
                         {
-                          
+                          printRule( BIN_OP, LOG_OP );
                         }
                         | N_REL_OP
                         {
-                          
+                          printRule( REL_OP, BIN_OP );
                         };
 
 N_ARITH_OP:             T_MULT
                         {
-                          
+                          printRule( ARITH_OP, MULT );
                         }
                         | T_SUB
                         {
-                          
+                          printRule( ARITH_OP, SUB );
                         }
                         | T_DIV
                         {
-                          
+                          printRule( ARITH_OP, DIV );
                         }
                         | T_ADD
                         {
-                          
+                          printRule( ARITH_OP, ADD );
                         };
 
 N_LOG_OP:               T_AND
                         {
-                          
+                          printRule( LOG_OP, AND );
                         }
                         | T_OR
                         {
-                          
+                          printRule( LOG_OP, OR );
                         };
 
 N_REL_OP:               T_LT
                         {
-                          
+                          printRule( REL_OP, LT );
                         }
                         | T_GT
                         {
-                          
+                          printRule( REL_OP, GT );
                         }
                         | T_LE
                         {
-                          
+                          printRule( REL_OP, LE );
                         }
                         | T_GE
                         {
-                          
+                          printRule( REL_OP, GE );
                         }
                         | T_EQ
                         {
-                          
+                          printRule( REL_OP, EQ );
                         }
                         | T_NE
                         {
-                          
-                        }
-                        T_NOT
-                        {
-                          
+                          printRule( REL_OP, NE );
                         };
 
 N_UN_OP:                T_NOT
                         {
-                          
+                          printRule( UN_OP, NOT );
                         };
 
 %%
@@ -398,7 +394,7 @@ int main( )
 {
   do
   {
-        yyparse();
+    yyparse();
   } 
   while( !feof( yyin ) );
 
