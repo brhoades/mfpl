@@ -392,7 +392,7 @@ int yyerror( const char *s )
 
 void printTokenInfo( int tokenType, const char* lexeme )
 {
-  printf( "TOKEN: %s  LEXEME: %s\n", tokenType, lexeme );
+  printf( "TOKEN: %s  LEXEME: %s\n", names[tokenType], lexeme );
 }
 
 int main( )
