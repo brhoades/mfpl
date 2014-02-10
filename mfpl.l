@@ -92,7 +92,7 @@ COMMENT ;[^\n]*
             }
 
 {LETSTAR}   {
-              printTokenInfo( TOKEN_LETSTAR, yytext );
+              printTokenInfo( LETSTAR, yytext );
               return T_LETSTAR;
             }
 

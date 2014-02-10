@@ -279,7 +279,7 @@ N_LAMBDA_EXPR:          T_LAMBDA T_LPAREN N_ID_LIST T_RPAREN N_EXPR
 
 N_ID_LIST:              /* epsilon */
                         {
-                          printRule( ID_LIST, NIL );
+                          printRule( ID_LIST, EPSILON );
                         }
                         | N_ID_LIST T_IDENT
                         {
