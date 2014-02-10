@@ -410,7 +410,7 @@ void vPrintRule( int num, ... )
   }
   
   strcat( out, "\n" );
-  printf( out );
+  printf( "%s", out );
   va_end( args );
 }
 
