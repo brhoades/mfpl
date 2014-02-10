@@ -135,7 +135,7 @@ const char* names[NUM_SYMBOLS] =
     "<=",
     ">=",
     "=",
-    "!=",
+    "/=",
     "NOT",
     "EXPR",
     "CONST",
