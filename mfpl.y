@@ -207,7 +207,7 @@ N_EXPR:                 N_CONST
                         }
                         | T_IDENT
                         { 
-                          printRule( EXPR, UNDEFINED );
+                          printRule( EXPR, IDENT );
                         
                           if( !addToSymbolTable( $1, UNDEFINED ) )
                             return -1;
@@ -462,13 +462,13 @@ void printTokenInfo( int tokenType, const char* lexeme )
 void beginScope( )
 {
   scopeStack.push( SYMBOL_TABLE( ) );
-  printf("\n    Entering new scope...\n\n");
+  printf("\n____Entering new scope...\n\n");
 }
 
 void endScope( )
 {
   scopeStack.pop( );
-  printf("\n    Exiting scope...\n\n");
+  printf("\n____Exiting scope...\n\n");
 }
 
 bool addToSymbolTable( char* s, int t )
@@ -477,7 +477,7 @@ bool addToSymbolTable( char* s, int t )
 
   SYMBOL_TABLE_ENTRY symbol = SYMBOL_TABLE_ENTRY( string( s ), t );
   scopeStack.top( ).addEntry( symbol  );
-  printf( "   Adding %s to symbol table\n", s );
+  printf( "___Adding %s to symbol table\n", s );
 
   if( found )
   {
