@@ -209,8 +209,11 @@ N_EXPR:                 N_CONST
                         { 
                           printRule( EXPR, IDENT );
                         
-                          if( !addToSymbolTable( $1, UNDEFINED ) )
+                          if( !findEntryInAnyScope( $1 ) )
+                          {
+                            yyerror( "Undefined identifier" );
                             return -1;
+                          }
                         }
                         | T_LPAREN N_PARENTHESIZED_EXPR T_RPAREN
                         {
@@ -462,13 +465,13 @@ void printTokenInfo( int tokenType, const char* lexeme )
 void beginScope( )
 {
   scopeStack.push( SYMBOL_TABLE( ) );
-  printf("\n____Entering new scope...\n\n");
+  printf("\n___Entering new scope...\n\n");
 }
 
 void endScope( )
 {
   scopeStack.pop( );
-  printf("\n____Exiting scope...\n\n");
+  printf("\n___Exiting scope...\n\n");
 }
 
 bool addToSymbolTable( char* s, int t )
