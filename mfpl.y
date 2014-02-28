@@ -8,14 +8,19 @@
 %{
 #include <stdio.h>
 #include <stdarg.h>
+#include "SymbolTable.h"
+#include <stack>
 
-int numLines = 0;// good = 0; 
+stack<SYMBOL_TABLE> scopeStack;
+
+int numLines = 0; 
 
 void printRule( int, int );
 void vPrintRule( int, ... );
 int yyerror( const char *s );
 void printTokenInfo( int tokenType, const char* lexeme );
 const char* nameLookup( int token );
+bool findEntryInAnyScope( string );
 
 //Symbols enum that we use when printing out symbol information.
 //This way when small formatting changes are made I only need to update
@@ -165,11 +170,18 @@ extern "C"
 }
 
 %}
+
+%union
+{
+  char* text;
+};
+
 /* Token declarations */
 %token T_IDENT T_LPAREN T_RPAREN T_INTCONST T_STRCONST T_T T_NIL
 %token T_LETSTAR  T_LAMBDA T_PRINT T_INPUT T_ARITH_OP T_MULT T_SUB T_DIV T_ADD 
 %token T_AND T_OR T_LT T_GT T_LE T_GE T_EQ T_NE T_NOT T_IF
 
+%type  <text> T_IDENT;
 %start N_START
 
 %%
@@ -188,6 +200,7 @@ N_EXPR:                 N_CONST
                         }
                         | T_IDENT
                         {
+                          bool found = findEntryInAnyScope(string($1));
                           printRule( EXPR, IDENT );
                         }
                         | T_LPAREN N_PARENTHESIZED_EXPR T_RPAREN
@@ -426,6 +439,36 @@ int yyerror( const char *s )
 void printTokenInfo( int tokenType, const char* lexeme )
 {
   printf( "TOKEN: %s\tLEXEME: %s\n", names[tokenType], lexeme );
+}
+
+void beginScope( )
+{
+  scopeStack.push( SYMBOL_TABLE( ) );
+  printf("\n    Entering new scope...\n\n");
+}
+
+void endScope( )
+{
+  scopeStack.pop( );
+  printf("\n    Exiting scope...\n\n");
+}
+
+bool findEntryInAnyScope( string theName )
+{
+  if(scopeStack.empty( ))
+    return( false );
+  bool found = scopeStack.top( ).findEntry( theName );
+  if( found )
+    return( true );
+  else
+  { // check in "next higher" scope
+    SYMBOL_TABLE symbolTable = scopeStack.top( );
+    scopeStack.pop( );
+    found = findEntryInAnyScope( theName );
+    scopeStack.push( symbolTable ); // restore the stack
+  }
+
+  return( found );
 }
 
 int main( )
