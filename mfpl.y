@@ -14,6 +14,7 @@
 stack<SYMBOL_TABLE> scopeStack;
 
 int numLines = 0; 
+bool good    = true;
 
 void printRule( int, int );
 void vPrintRule( int, ... );
@@ -21,6 +22,9 @@ int yyerror( const char *s );
 void printTokenInfo( int tokenType, const char* lexeme );
 const char* nameLookup( int token );
 bool findEntryInAnyScope( string );
+void beginScope( );
+void endScope( );
+bool addToSymbolTable( char*, int );
 
 //Symbols enum that we use when printing out symbol information.
 //This way when small formatting changes are made I only need to update
@@ -182,6 +186,9 @@ extern "C"
 %token T_AND T_OR T_LT T_GT T_LE T_GE T_EQ T_NE T_NOT T_IF
 
 %type  <text> T_IDENT;
+%type  <text> N_ID_EXPR_LIST;
+%type  <text> N_ID_LIST;
+
 %start N_START
 
 %%
@@ -199,9 +206,11 @@ N_EXPR:                 N_CONST
                           printRule( EXPR, CONST );
                         }
                         | T_IDENT
-                        {
-                          bool found = findEntryInAnyScope(string($1));
-                          printRule( EXPR, IDENT );
+                        { 
+                          printRule( EXPR, UNDEFINED );
+                        
+                          if( !addToSymbolTable( $1, UNDEFINED ) )
+                            return -1;
                         }
                         | T_LPAREN N_PARENTHESIZED_EXPR T_RPAREN
                         {
@@ -272,6 +281,7 @@ N_LET_EXPR:             T_LETSTAR T_LPAREN N_ID_EXPR_LIST T_RPAREN N_EXPR
                         {
                           vPrintRule( 6, LET_EXPR, LETSTAR, LPAREN, ID_EXPR_LIST, 
                                      RPAREN, EXPR );
+                          endScope( );
                         };
 
 N_ID_EXPR_LIST:         /* epsilon */
@@ -279,15 +289,20 @@ N_ID_EXPR_LIST:         /* epsilon */
                           printRule( ID_EXPR_LIST, EPSILON );
                         }
                         | N_ID_EXPR_LIST T_LPAREN T_IDENT N_EXPR T_RPAREN
-                        {
+                        { 
                           vPrintRule( 6, ID_EXPR_LIST, ID_EXPR_LIST, LPAREN, 
                                       IDENT, EXPR, RPAREN );
+                          
+                          if( !addToSymbolTable( $3, UNDEFINED ) )
+                            return -1;
+
                         };
 
 N_LAMBDA_EXPR:          T_LAMBDA T_LPAREN N_ID_LIST T_RPAREN N_EXPR
                         {
                           vPrintRule( 6, LAMBDA_EXPR, LAMBDA, LPAREN, ID_LIST,
                                       RPAREN, EXPR );
+                          endScope( );
                         };
 
 N_ID_LIST:              /* epsilon */
@@ -297,6 +312,9 @@ N_ID_LIST:              /* epsilon */
                         | N_ID_LIST T_IDENT
                         {
                           vPrintRule( 3, ID_LIST, ID_LIST, IDENT );
+                          
+                          if( !addToSymbolTable( $2, UNDEFINED ) )
+                            return -1;
                         };
 
 N_PRINT_EXPR:           T_PRINT N_EXPR
@@ -432,7 +450,7 @@ void vPrintRule( int num, ... )
 int yyerror( const char *s )
 {
   printf( "Line %i: %s\n", numLines+1, s );
-
+  
   return 1;
 }
 
@@ -451,6 +469,23 @@ void endScope( )
 {
   scopeStack.pop( );
   printf("\n    Exiting scope...\n\n");
+}
+
+bool addToSymbolTable( char* s, int t )
+{
+  bool found = findEntryInAnyScope( string( s ) );
+
+  SYMBOL_TABLE_ENTRY symbol = SYMBOL_TABLE_ENTRY( string( s ), t );
+  scopeStack.top( ).addEntry( symbol  );
+  printf( "   Adding %s to symbol table\n", s );
+
+  if( found )
+  {
+    yyerror( "Multiply defined identifier" );
+    return false;
+  }
+
+  return true;
 }
 
 bool findEntryInAnyScope( string theName )
