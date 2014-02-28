@@ -21,8 +21,9 @@ void vPrintRule( int, ... );
 int yyerror( const char *s );
 void printTokenInfo( int tokenType, const char* lexeme );
 const char* nameLookup( int token );
-bool findEntryInAnyScope( string );
 void beginScope( );
+int  findEntryInAnyScope( string, int );
+bool  findEntryInAnyScope( string );
 void endScope( );
 bool addToSymbolTable( char*, int );
 
@@ -476,13 +477,13 @@ void endScope( )
 
 bool addToSymbolTable( char* s, int t )
 {
-  bool found = findEntryInAnyScope( string( s ) );
+  int found = findEntryInAnyScope( string( s ), -1 );
 
   SYMBOL_TABLE_ENTRY symbol = SYMBOL_TABLE_ENTRY( string( s ), t );
   scopeStack.top( ).addEntry( symbol  );
   printf( "___Adding %s to symbol table\n", s );
 
-  if( found )
+  if( found == 0 )
   {
     yyerror( "Multiply defined identifier" );
     return false;
@@ -491,22 +492,36 @@ bool addToSymbolTable( char* s, int t )
   return true;
 }
 
+// Wrap to pass in a -1 by default.
 bool findEntryInAnyScope( string theName )
 {
-  if(scopeStack.empty( ))
-    return( false );
+  if( findEntryInAnyScope( theName, -1 ) >= 0 )
+    return true;
+  else
+    return false;
+}
+
+// Returns the scope level in which this is defined. -1 if not defined.
+int findEntryInAnyScope( string theName, int level )
+{
+  if( scopeStack.empty( ) )
+    return( -1 );
   bool found = scopeStack.top( ).findEntry( theName );
   if( found )
-    return( true );
+    return( level+1 );
   else
   { // check in "next higher" scope
     SYMBOL_TABLE symbolTable = scopeStack.top( );
     scopeStack.pop( );
-    found = findEntryInAnyScope( theName );
+    level = findEntryInAnyScope( theName, level+1 );
+    if( level >= 0 )
+      found = true;
+    else
+      level = -1;
     scopeStack.push( symbolTable ); // restore the stack
   }
 
-  return( found );
+  return( level );
 }
 
 int main( )
