@@ -13,19 +13,23 @@
 
 stack<SYMBOL_TABLE> scopeStack;
 
-int numLines = 0; 
-bool good    = true;
+int numLines      = 0; 
+bool good         = true;
+int expListLen    = 0;
 
 void printRule( int, int );
 void vPrintRule( int, ... );
-int yyerror( const char *s );
+int  yyerror( const char *s );
 void printTokenInfo( int tokenType, const char* lexeme );
 const char* nameLookup( int token );
 void beginScope( );
 int  findEntryInAnyScope( string, int );
-bool  findEntryInAnyScope( string );
+bool findEntryInAnyScope( string );
 void endScope( );
 bool addToSymbolTable( char*, int );
+void passthrough( TYPE_INFO, int );
+void passthrough( TYPE_INFO, int, int, int );
+void passthrough( TYPE_INFO, TYPE_INFO );
 
 //Symbols enum that we use when printing out symbol information.
 //This way when small formatting changes are made I only need to update
@@ -193,6 +197,8 @@ extern "C"
 
 %type  <typeInfo> N_EXPR N_PARENTHESIZED_EXPR N_IF_EXPR;
 %type  <typeInfo> N_CONST N_ARITHLOGIC_EXPR N_BIN_OP;
+%type  <typeInfo> N_PRINT_EXPR N_LAMBDA_EXPR N_INPUT_EXPR;
+%type  <typeInfo> N_EXPR_LIST N_LET_EXPR;
 
 %start N_START
 
@@ -208,6 +214,8 @@ N_START:                N_EXPR
 N_EXPR:                 N_CONST
                         {
                           printRule( EXPR, CONST );
+
+                          passthrough( $$, $1 );
                         }
                         | T_IDENT
                         { 
@@ -218,65 +226,82 @@ N_EXPR:                 N_CONST
                             yyerror( "Undefined identifier" );
                             return -1;
                           }
+
+                          passthrough( $$, INT );
                         }
                         | T_LPAREN N_PARENTHESIZED_EXPR T_RPAREN
                         {
                           vPrintRule( 4, EXPR, LPAREN, PARENTHESIZED_EXPR, RPAREN );
                           
-                          $$.type       = $2.type;
-                          $$.numParams  = $2.numParams;
-                          $$.returnType = $2.returnType;
+                          passthrough( $$, $2 );
                         };
                
 N_CONST:                T_INTCONST
                         {
                           printRule( CONST, INTCONST );
                           
-                          $$.type       = INT;
-                          $$.numParams  = NOT_APPLICABLE;
-                          $$.returnType = NOT_APPLICABLE;
-                          
+                          passthrough( $$, INT ); 
                         }
                         | T_STRCONST
                         {
                           printRule( CONST, STRCONST );
+                          
+                          passthrough( $$, STR );
                         }
                         | T_T
                         {
                           printRule( CONST, T );
+
+                          passthrough( $$, BOOL );
                         }
                         | T_NIL
                         {
                           printRule( CONST, NIL );
+
+                          passthrough( $$, BOOL );
                         };
 
 N_PARENTHESIZED_EXPR:   N_ARITHLOGIC_EXPR
                         {
                           printRule( PARENTHESIZED_EXPR, ARITHLOGIC_EXPR );
+
+                          passthrough( $$, $1 );
                         }
                         | N_IF_EXPR
                         {
                           printRule( PARENTHESIZED_EXPR, IF_EXPR );
+
+                          passthrough( $$, $1 );
                         }
                         | N_LET_EXPR
                         {
                           printRule( PARENTHESIZED_EXPR, LET_EXPR );
+                          
+                          passthrough( $$, $1 );
                         }
                         | N_LAMBDA_EXPR
                         {
                           printRule( PARENTHESIZED_EXPR, LAMBDA_EXPR );
+                          
+                          passthrough( $$, $1 );
                         }
                         | N_PRINT_EXPR
                         {
                           printRule( PARENTHESIZED_EXPR, PRINT_EXPR );
+                    
+                          passthrough( $$, $1 );
                         }
                         | N_INPUT_EXPR
                         {
                           printRule( PARENTHESIZED_EXPR, INPUT_EXPR );
+
+                          passthrough( $$, $1 );
                         }
                         | N_EXPR_LIST
                         {
                           printRule( PARENTHESIZED_EXPR, EXPR_LIST );
+                          
+                          passthrough( $$, $1 );
                         };
 
 N_ARITHLOGIC_EXPR:      N_UN_OP N_EXPR
@@ -286,19 +311,19 @@ N_ARITHLOGIC_EXPR:      N_UN_OP N_EXPR
                           if( $2.type == FUNCTION )
                             return( yyerror( "Arg 1 cannot be function" ) );
 
-                          $$.type       = BOOL;
-                          $$.numParams  = NOT_APPLICABLE;
-                          $$.returnType = NOT_APPLICABLE; 
+                          passthrough( $$, BOOL );
                         }
                         | N_BIN_OP N_EXPR N_EXPR
                         {
                           vPrintRule( 4, ARITHLOGIC_EXPR, BIN_OP, EXPR, EXPR );
 
+                          passthrough( $$, BOOL );
+
                           // Bad when not $2 != $3 != (INT || STR )
                           if( $1.opType == OP_REL )
                           {
                             if( $2.type == INT && $3.type != INT )
-                                return( yyerror( "Arg 2 must be integer" ) );
+                                return( yyerror( "Arg 2 must be int" ) );
                             else if( $2.type == STR && $3.type != STR )
                                 return( yyerror( "Arg 2 must be string" ) );
                             else if( $2.type != INT && $2.type != STR ) 
@@ -317,16 +342,16 @@ N_ARITHLOGIC_EXPR:      N_UN_OP N_EXPR
                               return( yyerror( "Arg 1 must be integer" ) );
                             else if( $3.type != INT )
                               return( yyerror( "Arg 2 must be integer" ) );
+                            
+                            passthrough( $$, INT );
                           }
-
-                          $$.type       = INT;
-                          $$.numParams  = NOT_APPLICABLE;
-                          $$.returnType = NOT_APPLICABLE;
                         };
                         
 N_IF_EXPR:              T_IF N_EXPR N_EXPR N_EXPR
                         {
                           vPrintRule( 5, IF_EXPR, IF, EXPR, EXPR, EXPR );
+
+                          passthrough( $$, $3.type | $4.type );
                         };
 
 N_LET_EXPR:             T_LETSTAR T_LPAREN N_ID_EXPR_LIST T_RPAREN N_EXPR
@@ -334,6 +359,8 @@ N_LET_EXPR:             T_LETSTAR T_LPAREN N_ID_EXPR_LIST T_RPAREN N_EXPR
                           vPrintRule( 6, LET_EXPR, LETSTAR, LPAREN, ID_EXPR_LIST, 
                                      RPAREN, EXPR );
                           endScope( );
+
+                          passthrough( $$, $5.type );
                         };
 
 N_ID_EXPR_LIST:         /* epsilon */
@@ -355,6 +382,11 @@ N_LAMBDA_EXPR:          T_LAMBDA T_LPAREN N_ID_LIST T_RPAREN N_EXPR
                           vPrintRule( 6, LAMBDA_EXPR, LAMBDA, LPAREN, ID_LIST,
                                       RPAREN, EXPR );
                           endScope( );
+                          
+                          if( $5.type == FUNCTION )
+                            return( yyerror( "Arg 2 cannot be function" ) );
+
+                          passthrough( $$, FUNCTION ); //Can't access # from N_ID_LIST 
                         };
 
 N_ID_LIST:              /* epsilon */
@@ -365,27 +397,51 @@ N_ID_LIST:              /* epsilon */
                         {
                           vPrintRule( 3, ID_LIST, ID_LIST, IDENT );
                           
-                          if( !addToSymbolTable( $2, UNDEFINED ) )
+                          if( !addToSymbolTable( $2, INT) )
                             return -1;
                         };
 
 N_PRINT_EXPR:           T_PRINT N_EXPR
                         {
                           vPrintRule( 3, PRINT_EXPR, PRINT, EXPR );
+
+                          if( $2.type == FUNCTION )
+                            return( yyerror( "Arg 1 cannot be function" ) );
+
+                          passthrough( $$, $2.type );
                         };
 
 N_INPUT_EXPR:           T_INPUT
                         {
                           printRule( INPUT_EXPR, INPUT );
+
+                          passthrough( $$, INT | STR );
                         };
 
 N_EXPR_LIST:            N_EXPR N_EXPR_LIST
                         {
                           vPrintRule( 3, EXPR_LIST, EXPR, EXPR_LIST );
+                          
+                          //I don' t know if I can check first here, so I'm going to leave it as is
+                          if( $1.type == FUNCTION )
+                          {
+                            if( $1.numParams != expListLen )
+                              return( $1.numParams > expListLen ? yyerror( "Too many parameters in function call" ) 
+                                        : yyerror( "Too few parameters in function call" ) );
+                          
+                            if( $1.returnType == FUNCTION )
+                              return( yyerror( "Arg 1 can't return function" ) );
+
+                            passthrough( $$, $1.returnType );
+                          }
+
+                          expListLen += 1;
                         }
                         | N_EXPR
                         {
                           printRule( EXPR_LIST, EXPR );
+
+                          expListLen = 1;
                         };
 
 N_BIN_OP:               N_ARITH_OP
@@ -574,6 +630,28 @@ int findEntryInAnyScope( string theName, int level )
   }
 
   return( level );
+}
+
+// Replacing commonly used "TYPE NOTHING NOTHING" values everywhree
+void passthrough( TYPE_INFO typeinfo, int type )
+{
+  typeinfo.numParams  = NOT_APPLICABLE;
+  typeinfo.returnType = NOT_APPLICABLE;
+  typeinfo.type = type;
+}
+
+void passthrough( TYPE_INFO typeinfo, int type, int numParams, int returnType )
+{
+  typeinfo.numParams  = numParams;
+  typeinfo.returnType = returnType;
+  typeinfo.type = type;
+}
+
+void passthrough( TYPE_INFO lhs, TYPE_INFO rhs )
+{ 
+  lhs.numParams  = rhs.numParams;
+  lhs.returnType = rhs.returnType;
+  lhs.type       = rhs.type;
 }
 
 int main( )
