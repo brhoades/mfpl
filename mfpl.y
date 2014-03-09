@@ -191,6 +191,9 @@ extern "C"
 %type  <text> N_ID_EXPR_LIST;
 %type  <text> N_ID_LIST;
 
+%type  <typeInfo> N_EXPR N_PARENTHESIZED_EXPR N_IF_EXPR;
+%type  <typeInfo> N_CONST N_ARITHLOGIC_EXPR N_BIN_OP;
+
 %start N_START
 
 %%
@@ -198,7 +201,6 @@ N_START:                N_EXPR
                         {
                           printRule( START, EXPR );
                           printf( "\n---- Completed parsing ----\n\n" );
-                          //good = 1;
                           
                           return 0;
                         };
@@ -220,11 +222,20 @@ N_EXPR:                 N_CONST
                         | T_LPAREN N_PARENTHESIZED_EXPR T_RPAREN
                         {
                           vPrintRule( 4, EXPR, LPAREN, PARENTHESIZED_EXPR, RPAREN );
+                          
+                          $$.type       = $2.type;
+                          $$.numParams  = $2.numParams;
+                          $$.returnType = $2.returnType;
                         };
                
 N_CONST:                T_INTCONST
                         {
                           printRule( CONST, INTCONST );
+                          
+                          $$.type       = INT;
+                          $$.numParams  = NOT_APPLICABLE;
+                          $$.returnType = NOT_APPLICABLE;
+                          
                         }
                         | T_STRCONST
                         {
@@ -271,10 +282,26 @@ N_PARENTHESIZED_EXPR:   N_ARITHLOGIC_EXPR
 N_ARITHLOGIC_EXPR:      N_UN_OP N_EXPR
                         {
                           vPrintRule( 3, ARITHLOGIC_EXPR, UN_OP, EXPR );
+
+                          if( $2.type == FUNCTION )
+                            return( yyerror( "Arg 1 cannot be function" ) );
+
+                          $$.type       = BOOL;
+                          $$.numParams  = NOT_APPLICABLE;
+                          $$.returnType = NOT_APPLICABLE; 
                         }
                         | N_BIN_OP N_EXPR N_EXPR
                         {
                           vPrintRule( 4, ARITHLOGIC_EXPR, BIN_OP, EXPR, EXPR );
+
+                          if( $2.type != INT )
+                            return( yyerror( "Arg 1 must be integer" ) );
+                          if( $3.type != INT )
+                            return( yyerror( "Arg 2 must be integer" ) );
+
+                          $$.type       = INT;
+                          $$.numParams  = NOT_APPLICABLE;
+                          $$.returnType = NOT_APPLICABLE;
                         };
                         
 N_IF_EXPR:              T_IF N_EXPR N_EXPR N_EXPR
@@ -344,14 +371,20 @@ N_EXPR_LIST:            N_EXPR N_EXPR_LIST
 N_BIN_OP:               N_ARITH_OP
                         {
                           printRule( BIN_OP, ARITH_OP );
+
+                          $$.opType = OP_ARITH;
                         }
                         | N_LOG_OP
                         {
                           printRule( BIN_OP, LOG_OP );
+
+                          $$.opType = OP_LOGIC;
                         }
                         | N_REL_OP
                         {
                           printRule( BIN_OP, REL_OP );
+
+                          $$.opType = OP_REL;
                         };
 
 N_ARITH_OP:             T_MULT

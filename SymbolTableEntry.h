@@ -11,23 +11,30 @@
 #include <string>
 using namespace std;
 
-#define UNDEFINED  -1
-#define FUNCTION 0
-#define INT 1
-#define STR 2
-#define INT_OR_STR 3
-#define BOOL 4
-#define INT_OR_BOOL 5
-#define STR_OR_BOOL 6
-#define INT_OR_STR_OR_BOOL 7
+// char type
+#define UNDEFINED           -1
+#define FUNCTION            0
+#define INT                 1
+#define STR                 2
+#define INT_OR_STR          3
+#define BOOL                4
+#define INT_OR_BOOL         5
+#define STR_OR_BOOL         6
+#define INT_OR_STR_OR_BOOL  7
 
-#define NOT_APPLICABLE  -1
+#define NOT_APPLICABLE      -1
+
+// char opType
+#define OP_REL              0
+#define OP_LOGIC            1
+#define OP_ARITH            2
 
 typedef struct
 {
-  int type;        // one of the above type codes
+  char type;        // one of the above type codes
   int numParams;   // numParams and returnType only applicable
   int returnType;  // if type == FUNCTION
+  char opType;
 } TYPE_INFO;
 
 
