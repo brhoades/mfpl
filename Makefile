@@ -1,5 +1,5 @@
-sampleInputDir=docs/hw2/sample_input
-sampleOutputDir=docs/hw2/expected_output
+sampleInputDir=docs/hw4/sample_input
+sampleOutputDir=docs/hw4/expected_output
 
 sampleInputFiles=$(wildcard $(sampleInputDir)/*.txt)
 sampleOutputFiles=$(wildcard $(sampleOutputDir)/*.out)

@@ -514,9 +514,7 @@ int findEntryInAnyScope( string theName, int level )
     SYMBOL_TABLE symbolTable = scopeStack.top( );
     scopeStack.pop( );
     level = findEntryInAnyScope( theName, level+1 );
-    if( level >= 0 )
-      found = true;
-    else
+    if( level <= 0 )
       level = -1;
     scopeStack.push( symbolTable ); // restore the stack
   }
