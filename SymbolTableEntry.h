@@ -11,8 +11,8 @@
 #include <string>
 using namespace std;
 
-//#define UNDEFINED  -1
-#define UNDEFINED 0
+#define UNDEFINED  -1
+#define FUNCTION 0
 #define INT 1
 #define STR 2
 #define INT_OR_STR 3

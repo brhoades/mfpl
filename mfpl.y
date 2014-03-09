@@ -179,6 +179,7 @@ extern "C"
 %union
 {
   char* text;
+  TYPE_INFO typeInfo;
 };
 
 /* Token declarations */
