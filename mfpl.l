@@ -2,7 +2,7 @@
  * Billy J Rhoades <bjrq48@mst.edu>
  * CS256 Programming Languages and Translators 
  * Section 1A
- * Homework 2
+ * Homework 4
  */
 
 %{

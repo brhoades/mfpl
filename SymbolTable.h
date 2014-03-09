@@ -1,3 +1,10 @@
+/* 
+ * Billy J Rhoades <bjrq48@mst.edu>
+ * CS256 Programming Languages and Translators 
+ * Section 1A
+ * Homework 4
+ */
+
 #ifndef SYMBOL_TABLE_H
 #define SYMBOL_TABLE_H
 
@@ -54,7 +61,6 @@ namespace std;
     else
       return( true );
   }
-
 };
 
 #endif  // SYMBOL_TABLE_H

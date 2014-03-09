@@ -1,3 +1,10 @@
+/* 
+ * Billy J Rhoades <bjrq48@mst.edu>
+ * CS256 Programming Languages and Translators 
+ * Section 1A
+ * Homework 4
+ */
+
 #ifndef SYMBOL_TABLE_ENTRY_H
 #define SYMBOL_TABLE_ENTRY_H
 
