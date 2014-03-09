@@ -294,10 +294,30 @@ N_ARITHLOGIC_EXPR:      N_UN_OP N_EXPR
                         {
                           vPrintRule( 4, ARITHLOGIC_EXPR, BIN_OP, EXPR, EXPR );
 
-                          if( $2.type != INT )
-                            return( yyerror( "Arg 1 must be integer" ) );
-                          if( $3.type != INT )
-                            return( yyerror( "Arg 2 must be integer" ) );
+                          // Bad when not $2 != $3 != (INT || STR )
+                          if( $1.opType == OP_REL )
+                          {
+                            if( $2.type == INT && $3.type != INT )
+                                return( yyerror( "Arg 2 must be integer" ) );
+                            else if( $2.type == STR && $3.type != STR )
+                                return( yyerror( "Arg 2 must be string" ) );
+                            else if( $2.type != INT && $2.type != STR ) 
+                              return( yyerror( "Arg 1 must be int or string" ) );
+                          }
+                          else if( $1.opType == OP_LOGIC ) // Bad when ($2 || $3 ) == FUNC
+                          {
+                            if( $2.type == FUNCTION )
+                              return( yyerror( "Arg 1 cannot be function" ) );
+                            else if( $3.type == FUNCTION )
+                              return( yyerror( "Arg 2 cannot be function" ) );
+                          }
+                          else if( $1.opType == OP_ARITH ) // Bad when ( $2 || $3 ) != INT
+                          {
+                            if( $2.type != INT )
+                              return( yyerror( "Arg 1 must be integer" ) );
+                            else if( $3.type != INT )
+                              return( yyerror( "Arg 2 must be integer" ) );
+                          }
 
                           $$.type       = INT;
                           $$.numParams  = NOT_APPLICABLE;
