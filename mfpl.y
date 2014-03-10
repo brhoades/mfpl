@@ -27,10 +27,10 @@ int  findEntryInAnyScope( string, int );
 bool findEntryInAnyScope( string );
 int  findTypeInAnyScope( string );
 void endScope( );
-bool addToSymbolTable( char*, int );
-void passthrough( TYPE_INFO, int );
-void passthrough( TYPE_INFO, int, int, int );
-void passthrough( TYPE_INFO, TYPE_INFO );
+bool addToSymbolTable( char*, char );
+void passthrough( TYPE_INFO&, char );
+void passthrough( TYPE_INFO&, char, int, int );
+void passthrough( TYPE_INFO&, TYPE_INFO );
 
 //Symbols enum that we use when printing out symbol information.
 //This way when small formatting changes are made I only need to update
@@ -215,8 +215,11 @@ N_START:                N_EXPR
 N_EXPR:                 N_CONST
                         {
                           printRule( EXPR, CONST );
+                          
+                          printf( "===Got NEXPR type: %i\n", $1.type );
 
                           passthrough( $$, $1 );
+                          printf( "%i look at me now!\n", $$.type );
                         }
                         | T_IDENT
                         { 
@@ -227,13 +230,18 @@ N_EXPR:                 N_CONST
                             yyerror( "Undefined identifier" );
                             return -1;
                           }
+
+                          printf( "===Found type: %i\n", findTypeInAnyScope( $1 ) );
                         
                           passthrough( $$, findTypeInAnyScope( $1 ) );
+
+                          printf( "%i look at me now!\n", $$.type );
                         }
                         | T_LPAREN N_PARENTHESIZED_EXPR T_RPAREN
                         {
                           vPrintRule( 4, EXPR, LPAREN, PARENTHESIZED_EXPR, RPAREN );
-                          
+                         
+                          printf( "===Got PARENEXPR type! %i\n", $2.type );
                           passthrough( $$, $2 );
                         };
                
@@ -327,7 +335,7 @@ N_ARITHLOGIC_EXPR:      N_UN_OP N_EXPR
                                 return( yyerror( "Arg 2 must be int" ) );
                             else if( $2.type == STR && $3.type != STR )
                                 return( yyerror( "Arg 2 must be string" ) );
-                            else if( $2.type != INT && $2.type != STR ) 
+                            else if( $2.type != INT && $3.type != STR ) 
                               return( yyerror( "Arg 1 must be int or string" ) );
                           }
                           else if( $1.opType == OP_LOGIC ) // Bad when ($2 || $3 ) == FUNC
@@ -339,6 +347,7 @@ N_ARITHLOGIC_EXPR:      N_UN_OP N_EXPR
                           }
                           else if( $1.opType == OP_ARITH ) // Bad when ( $2 || $3 ) != INT
                           {
+                            printf( "IS ACTUALLY: %i and %i\n", $2.type, $3.type );
                             if( $2.type != INT )
                               return( yyerror( "Arg 1 must be integer" ) );
                             else if( $3.type != INT )
@@ -586,12 +595,12 @@ void endScope( )
   printf("\n___Exiting scope...\n\n");
 }
 
-bool addToSymbolTable( char* s, int t )
+bool addToSymbolTable( char* s, char t )
 {
   int found = findEntryInAnyScope( string( s ), -1 );
 
   SYMBOL_TABLE_ENTRY symbol = SYMBOL_TABLE_ENTRY( string( s ), t );
-  scopeStack.top( ).addEntry( symbol  );
+  scopeStack.top( ).addEntry( symbol );
   printf( "___Adding %s to symbol table\n", s );
 
   if( found == 0 )
@@ -655,21 +664,21 @@ int findTypeInAnyScope( string theName )
 }
 
 // Replacing commonly used "TYPE NOTHING NOTHING" values everywhree
-void passthrough( TYPE_INFO typeinfo, int type )
+void passthrough( TYPE_INFO& typeinfo, char type )
 {
   typeinfo.numParams  = NOT_APPLICABLE;
   typeinfo.returnType = NOT_APPLICABLE;
   typeinfo.type = type;
 }
 
-void passthrough( TYPE_INFO typeinfo, int type, int numParams, int returnType )
+void passthrough( TYPE_INFO& typeinfo, char type, int numParams, int returnType )
 {
   typeinfo.numParams  = numParams;
   typeinfo.returnType = returnType;
   typeinfo.type = type;
 }
 
-void passthrough( TYPE_INFO lhs, TYPE_INFO rhs )
+void passthrough( TYPE_INFO& lhs, TYPE_INFO rhs )
 { 
   lhs.numParams  = rhs.numParams;
   lhs.returnType = rhs.returnType;

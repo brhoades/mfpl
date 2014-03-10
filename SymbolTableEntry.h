@@ -43,7 +43,7 @@ class SYMBOL_TABLE_ENTRY
   private:
     // Member variables
     string name;
-    int typeCode;
+    char typeCode;
 
   public:
     // Constructors
@@ -64,7 +64,7 @@ class SYMBOL_TABLE_ENTRY
     {
       return name;
     }
-    int getTypeCode() const
+    char getTypeCode() const
     {
       return typeCode;
     }
