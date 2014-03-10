@@ -333,8 +333,8 @@ N_ARITHLOGIC_EXPR:      N_UN_OP N_EXPR
                                 return( yyerror( "Arg 2 must be int" ) );
                             else if( $2.type & STR && !( $3.type & STR ) )
                                 return( yyerror( "Arg 2 must be string" ) );
-                            else if( $2.type & INT && !( $3.type & STR ) ) 
-                              return( yyerror( "Arg 1 must be int or string" ) );
+                            else if( !( $2.type & INT || $2.type & STR ) ) 
+                              return( yyerror( "Arg 1 must be integer or string" ) );
                           }
                           else if( $1.opType == OP_LOGIC ) // Bad when ($2 || $3 ) == FUNC
                           {
@@ -444,8 +444,8 @@ N_EXPR_LIST:            N_EXPR N_EXPR_LIST
                           if( $1.type == FUNCTION )
                           {
                             if( $1.numParams != expListLen )
-                              return( $1.numParams > expListLen ? yyerror( "Too many parameters in function call" ) 
-                                        : yyerror( "Too few parameters in function call" ) );
+                              return( $1.numParams > expListLen ? yyerror( "Too few parameters in function call" ) 
+                                        : yyerror( "Too many parameters in function call" ) );
                           
                             if( $1.returnType == FUNCTION )
                               return( yyerror( "Arg 1 can't return function" ) );

@@ -7,7 +7,7 @@ sampleOutputFiles=$(wildcard $(sampleOutputDir)/*.out)
 buildFiles=$(addprefix build/, $(notdir $(sampleOutputFiles)))
 diffFiles=$(addsuffix .diff,$(basename $(buildFiles)))
 
-diff=/usr/bin/diff --ignore-space-change --side-by-side --ignore-case --ignore-blank-lines
+diff=/usr/bin/diff --ignore-space-change --side-by-side --ignore-case --ignore-blank-lines --suppress-common-lines
 
 all: main
 
