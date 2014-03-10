@@ -16,6 +16,7 @@ stack<SYMBOL_TABLE> scopeStack;
 int numLines      = 0; 
 bool good         = true;
 int expListLen    = 0;
+int lambExprList  = 0;
 
 void printRule( int, int );
 void vPrintRule( int, ... );
@@ -328,11 +329,11 @@ N_ARITHLOGIC_EXPR:      N_UN_OP N_EXPR
                           // Bad when not $2 != $3 != (INT || STR )
                           if( $1.opType == OP_REL )
                           {
-                            if( $2.type == INT && $3.type != INT )
+                            if( $2.type & INT  && !( $3.type & INT ) )
                                 return( yyerror( "Arg 2 must be int" ) );
-                            else if( $2.type == STR && $3.type != STR )
+                            else if( $2.type & STR && !( $3.type & STR ) )
                                 return( yyerror( "Arg 2 must be string" ) );
-                            else if( $2.type != INT && $3.type != STR ) 
+                            else if( $2.type & INT && !( $3.type & STR ) ) 
                               return( yyerror( "Arg 1 must be int or string" ) );
                           }
                           else if( $1.opType == OP_LOGIC ) // Bad when ($2 || $3 ) == FUNC
@@ -345,9 +346,9 @@ N_ARITHLOGIC_EXPR:      N_UN_OP N_EXPR
                           else if( $1.opType == OP_ARITH ) // Bad when ( $2 || $3 ) != INT
                           {
                             //printf( "IS ACTUALLY: %i and %i\n", $2.type, $3.type );
-                            if( $2.type != INT )
+                            if( !( $2.type & INT ) )
                               return( yyerror( "Arg 1 must be integer" ) );
-                            else if( $3.type != INT )
+                            else if( !( $3.type & INT ) )
                               return( yyerror( "Arg 2 must be integer" ) );
                             
                             passthrough( $$, INT );
@@ -357,6 +358,13 @@ N_ARITHLOGIC_EXPR:      N_UN_OP N_EXPR
 N_IF_EXPR:              T_IF N_EXPR N_EXPR N_EXPR
                         {
                           vPrintRule( 5, IF_EXPR, IF, EXPR, EXPR, EXPR );
+
+                          if( $2.type == FUNCTION )
+                            return( yyerror( "Arg 1 cannot be function" ) );
+                          else if( $3.type == FUNCTION )
+                            return( yyerror( "Arg 2 cannot be function" ) );
+                          else if( $4.type == FUNCTION )
+                            return( yyerror( "Arg 3 cannot be function" ) );
 
                           passthrough( $$, $3.type | $4.type );
                         };
@@ -393,12 +401,13 @@ N_LAMBDA_EXPR:          T_LAMBDA T_LPAREN N_ID_LIST T_RPAREN N_EXPR
                           if( $5.type == FUNCTION )
                             return( yyerror( "Arg 2 cannot be function" ) );
 
-                          passthrough( $$, FUNCTION ); //Can't access # from N_ID_LIST 
+                          passthrough( $$, FUNCTION, lambExprList, $5.type );
                         };
 
 N_ID_LIST:              /* epsilon */
                         {
                           printRule( ID_LIST, EPSILON );
+                          lambExprList = 0;
                         }
                         | N_ID_LIST T_IDENT
                         {
@@ -406,6 +415,8 @@ N_ID_LIST:              /* epsilon */
                           
                           if( !addToSymbolTable( $2, INT ) )
                             return -1;
+
+                          lambExprList += 1;
                         };
 
 N_PRINT_EXPR:           T_PRINT N_EXPR
