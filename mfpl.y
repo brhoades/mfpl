@@ -216,10 +216,9 @@ N_EXPR:                 N_CONST
                         {
                           printRule( EXPR, CONST );
                           
-                          printf( "===Got NEXPR type: %i\n", $1.type );
+                          //printf( "===Got NEXPR type: %i\n", $1.type );
 
                           passthrough( $$, $1 );
-                          printf( "%i look at me now!\n", $$.type );
                         }
                         | T_IDENT
                         { 
@@ -231,17 +230,15 @@ N_EXPR:                 N_CONST
                             return -1;
                           }
 
-                          printf( "===Found type: %i\n", findTypeInAnyScope( $1 ) );
+                          //printf( "===Found type: %i\n", findTypeInAnyScope( $1 ) );
                         
                           passthrough( $$, findTypeInAnyScope( $1 ) );
-
-                          printf( "%i look at me now!\n", $$.type );
                         }
                         | T_LPAREN N_PARENTHESIZED_EXPR T_RPAREN
                         {
                           vPrintRule( 4, EXPR, LPAREN, PARENTHESIZED_EXPR, RPAREN );
                          
-                          printf( "===Got PARENEXPR type! %i\n", $2.type );
+                          //printf( "===Got PARENEXPR type! %i\n", $2.type );
                           passthrough( $$, $2 );
                         };
                
@@ -347,7 +344,7 @@ N_ARITHLOGIC_EXPR:      N_UN_OP N_EXPR
                           }
                           else if( $1.opType == OP_ARITH ) // Bad when ( $2 || $3 ) != INT
                           {
-                            printf( "IS ACTUALLY: %i and %i\n", $2.type, $3.type );
+                            //printf( "IS ACTUALLY: %i and %i\n", $2.type, $3.type );
                             if( $2.type != INT )
                               return( yyerror( "Arg 1 must be integer" ) );
                             else if( $3.type != INT )
@@ -382,7 +379,7 @@ N_ID_EXPR_LIST:         /* epsilon */
                           vPrintRule( 6, ID_EXPR_LIST, ID_EXPR_LIST, LPAREN, 
                                       IDENT, EXPR, RPAREN );
                           
-                          if( !addToSymbolTable( $3, INT ) )
+                          if( !addToSymbolTable( $3, $4.type ) )
                             return -1;
 
                         };
