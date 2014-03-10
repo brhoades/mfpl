@@ -48,6 +48,19 @@ class SYMBOL_TABLE
       else
         return( true );
     }
+
+    int getEntryType( string theName )
+    {
+      map<string, SYMBOL_TABLE_ENTRY>::iterator itr;
+      if( ( itr = hashTable.find( theName ) ) == hashTable.end( ) )
+      {
+        return UNDEFINED;
+      }
+      else
+      {
+        return itr->second.getTypeCode( );
+      }
+    }
 };
 
 #endif  // SYMBOL_TABLE_H

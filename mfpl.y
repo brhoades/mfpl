@@ -25,6 +25,7 @@ const char* nameLookup( int token );
 void beginScope( );
 int  findEntryInAnyScope( string, int );
 bool findEntryInAnyScope( string );
+int  findTypeInAnyScope( string );
 void endScope( );
 bool addToSymbolTable( char*, int );
 void passthrough( TYPE_INFO, int );
@@ -226,8 +227,8 @@ N_EXPR:                 N_CONST
                             yyerror( "Undefined identifier" );
                             return -1;
                           }
-
-                          passthrough( $$, INT );
+                        
+                          passthrough( $$, findTypeInAnyScope( $1 ) );
                         }
                         | T_LPAREN N_PARENTHESIZED_EXPR T_RPAREN
                         {
@@ -372,7 +373,7 @@ N_ID_EXPR_LIST:         /* epsilon */
                           vPrintRule( 6, ID_EXPR_LIST, ID_EXPR_LIST, LPAREN, 
                                       IDENT, EXPR, RPAREN );
                           
-                          if( !addToSymbolTable( $3, UNDEFINED ) )
+                          if( !addToSymbolTable( $3, INT ) )
                             return -1;
 
                         };
@@ -397,7 +398,7 @@ N_ID_LIST:              /* epsilon */
                         {
                           vPrintRule( 3, ID_LIST, ID_LIST, IDENT );
                           
-                          if( !addToSymbolTable( $2, INT) )
+                          if( !addToSymbolTable( $2, INT ) )
                             return -1;
                         };
 
@@ -630,6 +631,27 @@ int findEntryInAnyScope( string theName, int level )
   }
 
   return( level );
+}
+
+// Returns the scope level in which this is defined. -1 if not defined.
+int findTypeInAnyScope( string theName )
+{
+  if( scopeStack.empty( ) )
+    return( UNDEFINED );
+
+  int found = scopeStack.top( ).getEntryType( theName );
+
+  if( found != UNDEFINED )
+    return( found );
+  else
+  { // check in "next higher" scope
+    SYMBOL_TABLE symbolTable = scopeStack.top( );
+    scopeStack.pop( );
+    found = findTypeInAnyScope( theName );
+    scopeStack.push( symbolTable ); // restore the stack
+  }
+
+  return( found );
 }
 
 // Replacing commonly used "TYPE NOTHING NOTHING" values everywhree
