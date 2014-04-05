@@ -1,215 +1,151 @@
-/* 
- * Billy J Rhoades <bjrq48@mst.edu>
- * CS256 Programming Languages and Translators 
- * Section 1A
- * Homework 4
+/*    mfpl.l
+ 
+   Specifications of tokens for the MFPL language.
  */
 
 %{
- //Constants
 
-  typedef enum
-  {
-    RESERVED,   //reserved by lex
-    T_COMMENT,
-    T_UNKNOWN
-
-  } TYPE;
- 
-  void printTokenInfo(  int tokenType, const char* lexeme );
 %}
 
-NEWLINE \n
-WSPACE [ \t\r]+
-AWSPACENLINE [\n\t\r ]+
-DIGIT [0-9]
-LETTER [a-zA-Z]
+/*
+ *  Definitions of regular expressions
+*/
 
-/*sequence of one or more digits, can start with +/-, no size constraint*/
-INTCONST (\-|\+)?[0-9]+
+WSPACE      [ \t\r]+
+NEWLINE     \n
+LO_ALPHA    [a-z]
+HI_ALPHA    [A-Z]
+ALPHA       {LO_ALPHA}|{HI_ALPHA}
+DIGIT       [0-9]
+ALPHANUM    {ALPHA}|{DIGIT}
+UNDERSCORE   _
 
-/*a ' followed by a ' with stuff in between, or a " followed by " with the same stuff*/
-STRCONST \"[^\n]*\"|\'[^\n]*\'
+IDENT        ({UNDERSCORE}|{ALPHA})({ALPHANUM}|{UNDERSCORE})*
 
-/* let*, if, lambda, print, input, and, or, not, t, nil */
-LETSTAR let\*
-IF if
-LAMBDA lambda
-PRINT print
-INPUT input
-AND and
-OR or
-NOT not
-T t
-NIL nil
+NEG_INTCONST "-"[0-9]+
+POS_INTCONST ("+")?[0-9]+
+INTCONST     {NEG_INTCONST}|{POS_INTCONST}
 
-/* matches * / + - < > >= <= = /= *=  */
-ADD \+
-SUB \-
-MULT \*
-DIV \/
-LT <
-GT >
-LE <=
-GE >=
-EQ =
-NE \/=
+DOUBLE_QUOTE \"
+STRCONST     {DOUBLE_QUOTE}[^\"\n]*{DOUBLE_QUOTE} 
 
-/* parenthesis */
-RPAREN \)
-LPAREN \(
+COMMENT      ";".*$      
+/*
+ *  Tokens
+*/
+%%
 
-/*letter/underscore, then any number of letters / digits / underscores*/
-IDENT [A-Za-z_][A-Za-z0-9_]*
-
-/* Comment, anything after ; */
-COMMENT ;[^\n]*
-
-%%          
-{NEWLINE}   {
-               numLines += 1 ;
-            }
-
-{WSPACE}    {
-            }
-            
-{COMMENT}   {
-            }
-            
-{INTCONST}  {
-              printTokenInfo( INTCONST, yytext );
-              return T_INTCONST;
-            }
-
-{T}         {
-              printTokenInfo( T, yytext );
-              return T_T;
-            }
-            
-{STRCONST}  {
-              printTokenInfo( STRCONST, yytext );
-              return T_STRCONST;
-            }
-
-{LETSTAR}   {
-              printTokenInfo( TOKEN_LETSTAR, yytext );
-              beginScope( );
-              
-              return T_LETSTAR;
-            }
-
-{IF}        {
-              printTokenInfo( IF, yytext );
-              return T_IF;
-            }
-
-{LAMBDA}    {
-              printTokenInfo( LAMBDA, yytext );
-              beginScope( );
-
-              return T_LAMBDA;
-            }
-
-{PRINT}     {
-              printTokenInfo( PRINT, yytext );
-              return T_PRINT;
-            }
-
-{INPUT}     {
-              printTokenInfo( INPUT, yytext );
-              return T_INPUT;
-            }
-
-{AND}       {
-              printTokenInfo( AND, yytext );
-              return T_AND;
-            }
-
-{OR}        {
-              printTokenInfo( OR, yytext );
-              return T_OR;
-            }
-
-{NOT}       {
-              printTokenInfo( NOT, yytext );
-              return T_NOT;
-            }
-
-{NIL}       {
-              printTokenInfo( NIL, yytext );
-              return T_NIL;
-            }
-
-{RPAREN}    {
-              printTokenInfo( TOKEN_RPAREN, yytext );
-              return T_RPAREN;
-            }
-
-{LPAREN}    {
-              printTokenInfo( TOKEN_LPAREN, yytext );
-              return T_LPAREN;
-            }
-
-{ADD}       {
-              printTokenInfo( TOKEN_ADD, yytext );
-              return T_ADD;
-            }
-
-{SUB}       {
-              printTokenInfo( TOKEN_SUB, yytext );
-              return T_SUB;
-            }
-
-{MULT}      {
-              printTokenInfo( TOKEN_MULT, yytext );
-              return T_MULT;
-            }
-
-{DIV}       {
-              printTokenInfo( TOKEN_DIV, yytext );
-              return T_DIV;
-            }
-
-{LT}        {
-              printTokenInfo( TOKEN_LT, yytext );
-              return T_LT;
-            }
-
-{GT}        {
-              printTokenInfo( TOKEN_GT, yytext );
-              return T_GT;
-            }
-
-{LE}        {
-              printTokenInfo( TOKEN_LE, yytext );
-              return T_LE;
-            }
-
-{GE}        {
-              printTokenInfo( TOKEN_GE, yytext );
-              return T_GE;
-            }
-
-{EQ}        {
-              printTokenInfo( TOKEN_EQ, yytext );
-              return T_EQ;
-            }
-
-{NE}        {
-              printTokenInfo( TOKEN_NE, yytext );
-              return T_NE;
-            }
-
-{IDENT}     {
-              yylval.text = strdup(yytext);
-              
-              printTokenInfo( IDENT, yytext );
-              return T_IDENT;
-            }
-            
-.           {
-               printTokenInfo( UNKNOWN, yytext );
-               return T_UNKNOWN;
-            }
+"("     {
+          printf("TOKEN: LPAREN    LEXEME: %s\n", yytext);
+          return T_LPAREN;
+        }
+")"     {
+          printf("TOKEN: RPAREN    LEXEME: %s\n", yytext);
+          return T_RPAREN;
+        }
+"+"     {
+           printf("TOKEN: ADD       LEXEME: %s\n", yytext);
+          return T_ADD;
+        }
+"-"     {
+          printf("TOKEN: SUB       LEXEME: %s\n", yytext);
+          return T_SUB;
+        }
+"*"     {
+          printf("TOKEN: MULT      LEXEME: %s\n", yytext);
+          return T_MULT;
+        }
+"/"     {
+          printf("TOKEN: DIV       LEXEME: %s\n", yytext);
+          return T_DIV;
+        }
+">"     {
+          printf("TOKEN: GT        LEXEME: %s\n", yytext);
+          return T_GT;
+        }
+">="    {
+          printf("TOKEN: GE        LEXEME: %s\n", yytext);
+          return T_GE;
+        }
+"<"     {
+          printf("TOKEN: LT        LEXEME: %s\n", yytext);
+          return T_LT;
+        }
+"<="    {
+          printf("TOKEN: LE        LEXEME: %s\n", yytext);
+          return T_LE;
+        }
+"="     {
+          printf("TOKEN: EQ        LEXEME: %s\n", yytext);
+          return T_EQ;
+        }
+"/="    {
+          printf("TOKEN: NE        LEXEME: %s\n", yytext);
+          return T_NE;
+        }
+"let*"  {
+          printf("TOKEN: LETSTAR   LEXEME: %s\n", yytext);
+          beginScope();
+       
+          return T_LETSTAR;
+        }
+"if"    {
+          printf("TOKEN: IF        LEXEME: %s\n", yytext);
+          return T_IF;
+        }
+"print" {
+          printf("TOKEN: PRINT     LEXEME: %s\n", yytext);
+          return T_PRINT;
+        }
+"input" {
+          printf("TOKEN: INPUT     LEXEME: %s\n", yytext);
+          return T_INPUT;
+        }
+"t"     {
+         printf("TOKEN: T         LEXEME: %s\n", yytext);
+         return T_T;
+        }
+"nil"   {
+          printf("TOKEN: NIL       LEXEME: %s\n", yytext);
+          return T_NIL;
+        }
+"and"   {
+          printf("TOKEN: AND       LEXEME: %s\n", yytext);
+          return T_AND;
+        }
+"or"    {
+          printf("TOKEN: OR        LEXEME: %s\n", yytext);
+          return T_OR;
+        }
+"not"   {
+          printf("TOKEN: NOT       LEXEME: %s\n", yytext);
+          return T_NOT;
+        }
+{INTCONST} {
+             printf("TOKEN: INTCONST  LEXEME: %s\n", yytext);
+             return T_INTCONST;
+           }
+{STRCONST} {
+             printf("TOKEN: STRCONST  LEXEME: %s\n", yytext);
+             return T_STRCONST;
+           }
+{IDENT}    {
+             printf("TOKEN: IDENT     LEXEME: %s\n", yytext);
+             yylval.text = strdup(yytext);
+             return T_IDENT;
+           }
+{WSPACE}   { }
+{NEWLINE}  {
+              lineNum++;
+           }
+{COMMENT}  { }
+.          {
+             printf("TOKEN: UNKNOWN   LEXEME: %s\n",
+             yytext);
+             return T_UNKNOWN;
+           }
 
 %%
+
+
+
