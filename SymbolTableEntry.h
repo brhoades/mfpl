@@ -19,6 +19,8 @@ using namespace std;
 typedef struct
 {
   int type;       // one of the above type codes
+  char** strVal;
+  int intVal;
 } TYPE_INFO;
 
 class SYMBOL_TABLE_ENTRY

@@ -123,10 +123,12 @@ COMMENT      ";".*$
         }
 {INTCONST} {
              printf("TOKEN: INTCONST  LEXEME: %s\n", yytext);
+             yylval.num = atoi(yytext);
              return T_INTCONST;
            }
 {STRCONST} {
              printf("TOKEN: STRCONST  LEXEME: %s\n", yytext);
+             yylval.text = yytext;
              return T_STRCONST;
            }
 {IDENT}    {

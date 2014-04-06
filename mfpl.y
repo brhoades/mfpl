@@ -23,9 +23,28 @@
 #include "SymbolTable.h"
   using namespace std;
 
+#include <string.h>
+
+#define DEBUG
+
+#define KNRM  "\x1B[0m"
+#define KRED  "\x1B[31m"
+#define KGRN  "\x1B[32m"
+#define KYEL  "\x1B[33m"
+#define KBLU  "\x1B[34m"
+#define KMAG  "\x1B[35m"
+#define KCYN  "\x1B[36m"
+#define KWHT  "\x1B[37m"
+
 #define ARITHMETIC_OP	1   // classification for operators
 #define LOGICAL_OP   	2
 #define RELATIONAL_OP	3
+
+  typedef struct
+  {
+    int type;
+    char* name;
+  } OP;
 
   int lineNum = 1;
 
@@ -38,6 +57,10 @@
   void beginScope();
   void endScope();
   void cleanUp();
+  void setVal( TYPE_INFO&, TYPE_INFO& );
+  
+  char** getVal( TYPE_INFO );
+
   TYPE_INFO findEntryInAnyScope( const string theName );
 
   void printRule( const char*, const char* );
@@ -62,8 +85,9 @@
 %union
 {
   char* text;
-  int num;
   TYPE_INFO typeInfo;
+  OP op;
+  int num;
 };
 
 /*
@@ -75,11 +99,11 @@
 %token T_LT T_GT T_LE T_GE T_EQ T_NE T_AND T_OR T_NOT
 %token T_INTCONST T_STRCONST T_T T_NIL T_IDENT T_UNKNOWN
 
-%type	<text> T_IDENT
+%type	<text>     T_IDENT
 %type <typeInfo> N_EXPR N_PARENTHESIZED_EXPR N_ARITHLOGIC_EXPR
 %type <typeInfo> N_CONST N_IF_EXPR N_PRINT_EXPR N_INPUT_EXPR
 %type <typeInfo> N_LET_EXPR N_EXPR_LIST
-%type <num> N_BIN_OP
+%type <op>       N_BIN_OP N_ARITH_OP N_LOG_OP N_REL_OP 
 
 /*
  *	Starting point.
@@ -94,6 +118,7 @@ N_START:       N_EXPR
                {
                  printRule( "START", "EXPR" );
                  printf( "\n---- Completed parsing ----\n\n" );
+                 printf( "\nValue of the expression is: %s", getVal( $1 ) );
                  return 0;
                };
 
@@ -101,96 +126,121 @@ N_EXPR:        N_CONST
                {
                  printRule( "EXPR", "CONST" );
                  $$.type = $1.type;
+                 setVal( $$, $1 );
                } 
                | T_IDENT
                {
                  printRule( "EXPR", "IDENT" );
                  string ident = string( $1 );
-                 TYPE_INFO exprTypeInfo =
-                 findEntryInAnyScope( ident );
+                 TYPE_INFO exprTypeInfo = findEntryInAnyScope( ident );
                  if ( exprTypeInfo.type == UNDEFINED )
                  {
                    yyerror( "Undefined identifier" );
                    return( 0 );
                  }
                  $$.type = exprTypeInfo.type;
+                 setVal( $$, exprTypeInfo );
                }
                | T_LPAREN N_PARENTHESIZED_EXPR T_RPAREN
                {
                  printRule( "EXPR", "( PARENTHESIZED_EXPR )" );
                  $$.type = $2.type;
+                 setVal( $$, $2 );
+                 #if defined DEBUG
+                 if( $2.type != STR )
+                   printf( "%sDEBUG: ( PAREN ) -> (INT) %i%s\n", KRED, $$.intVal, KNRM );
+                 else
+                   printf( "%sDEBUG: ( PAREN ) -> (STR) %s%s\n", KRED, $$.strVal, KNRM );
+                 #endif
                };
 N_CONST:       T_INTCONST
                {
                  printRule( "CONST", "INTCONST" );
                  $$.type = INT;
+                 $$.intVal = yylval.num;
                }
                | T_STRCONST
                {
                  printRule( "CONST", "STRCONST" );
                  $$.type = STR;
+                 $$.strVal = &yylval.text;
                }
                | T_T
                {
                  printRule( "CONST", "t" );
                  $$.type = BOOL;
+                 $$.intVal = 1;
                }
                | T_NIL
                {
                  printRule( "CONST", "nil" );
                  $$.type = BOOL;
+                 $$.intVal = 0;
                };
 N_PARENTHESIZED_EXPR: N_ARITHLOGIC_EXPR
                 {
                   printRule( "PARENTHESIZED_EXPR",
                   "ARITHLOGIC_EXPR" );
                   $$.type = $1.type;
+                  setVal( $$, $1 );
                 }
                 | N_IF_EXPR
                 {
                   printRule( "PARENTHESIZED_EXPR", "IF_EXPR" );
                   $$.type = $1.type;
+                  setVal( $$, $1 );
                 }
                 | N_LET_EXPR
                 {
                   printRule( "PARENTHESIZED_EXPR",
                   "LET_EXPR" );
                   $$.type = $1.type;
+                  setVal( $$, $1 );
                 }
                 | N_PRINT_EXPR
                 {
                   printRule( "PARENTHESIZED_EXPR",
                   "PRINT_EXPR" );
                   $$.type = $1.type;
+                  setVal( $$, $1 );
+                  #if defined DEBUG
+                  printf( "%sDEBUG: N_PRINT_EXPR -> %i%s\n", KRED, $1.intVal, KNRM );
+                  #endif
                 }
                 | N_INPUT_EXPR
                 {
                   printRule( "PARENTHESIZED_EXPR",
                   "INPUT_EXPR" );
                   $$.type = $1.type;
+                  setVal( $$, $1 );
                 }
                 | N_EXPR_LIST
                 {
                   printRule( "PARENTHESIZED_EXPR",
                   "EXPR_LIST" );
                   $$.type = $1.type;
-                }
-                ;
-                N_ARITHLOGIC_EXPR	:
+                  setVal( $$, $1 );
+                };
+              
+N_ARITHLOGIC_EXPR	:
                 N_UN_OP N_EXPR
                 {
                   printRule( "ARITHLOGIC_EXPR",
                   "UN_OP EXPR" );
                   $$.type = BOOL;
+
+                  if( $2.type == BOOL )
+                    $$.intVal = !$2.intVal;
+                  else
+                    $$.intVal = 0;
                 }
                 | N_BIN_OP N_EXPR N_EXPR
                 {
-                  printRule( "ARITHLOGIC_EXPR",
-                  "BIN_OP EXPR EXPR" );
+                  printRule( "ARITHLOGIC_EXPR", "BIN_OP EXPR EXPR" );
                   $$.type = BOOL;
-                  switch ( $1 )
+                  switch ( $1.type )
                   {
-                  case ( ARITHMETIC_OP ) :
+                  case ( ARITHMETIC_OP ):
                     $$.type = INT;
                     if ( !isIntCompatible( $2.type ) )
                     {
@@ -202,12 +252,53 @@ N_PARENTHESIZED_EXPR: N_ARITHLOGIC_EXPR
                       yyerror( "Arg 2 must be integer" );
                       return( 0 );
                     }
+
+                    if( !strcmp( $1.name, "+" ) )
+                    {
+                      $$.intVal = $2.intVal + $3.intVal;
+                      #if defined DEBUG
+                      printf( "DEBUG: + %i ($2) %i ($3)\n", $2.intVal, $3.intVal );
+                      #endif
+                    }
+                    else if( !strcmp( $1.name, "-" ) )
+                      $$.intVal = $2.intVal - $3.intVal;
+                    else if( !strcmp( $1.name, "*" ) )
+                      $$.intVal = $2.intVal * $3.intVal;
+                    else if( !strcmp( $1.name, "/" ) )
+                    {
+                      if( $3.intVal == 0 )
+                      {
+                        printf( "ERROR PLACEHOLDER: DIV / 0\n" );
+                        return( 0 );
+                      }
+                      $$.intVal = $2.intVal / $3.intVal;
+                    }
                     break;
 
-                  case ( LOGICAL_OP ) :
+                  case ( LOGICAL_OP ):
+                    if( !strcmp( $1.name, "or" ) )
+                    {
+                      if( ( $2.type == BOOL && $2.intVal == 1 ) ||
+                          ( $2.type != BOOL ) ||
+                          ( $3.type == BOOL && $3.intVal == 1 ) ||
+                          ( $3.type != BOOL ) )
+                        $$.intVal = 1; 
+                      else
+                        $$.intVal = 0;
+                    }
+                    else
+                    {
+                      if( ( ( $2.type == BOOL && $2.intVal == 1 ) ||
+                          ( $2.type != BOOL ) ) &&
+                          ( ( $3.type == BOOL && $3.intVal == 1 ) ||
+                          ( $3.type != BOOL ) ) )
+                        $$.intVal = 1;
+                      else
+                        $$.intVal = 0;
+                    }
                     break;
 
-                  case ( RELATIONAL_OP ) :
+                  case ( RELATIONAL_OP ):
                     if ( !isIntOrStrCompatible( $2.type ) )
                     {
                       yyerror( "Arg 1 must be integer or string" );
@@ -269,6 +360,9 @@ N_PRINT_EXPR: T_PRINT N_EXPR
                 {
                   printRule( "PRINT_EXPR", "print EXPR" );
                   $$.type = $2.type;
+                  setVal( $$, $2 );
+                  printf( "%sDEBUG: EXPR -> %i%s\n ", KRED, $2.intVal, KNRM );
+                  printf( "%s\n", getVal( $2 ) );
                 };
 N_INPUT_EXPR: T_INPUT
                 {
@@ -288,69 +382,84 @@ N_EXPR_LIST: N_EXPR N_EXPR_LIST
 N_BIN_OP: N_ARITH_OP
                 {
                   printRule( "BIN_OP", "ARITH_OP" );
-                  $$ = ARITHMETIC_OP;
+                  $$ = $1;
+                  $$.type = ARITHMETIC_OP;
                 }
                 |
                 N_LOG_OP
                 {
                   printRule( "BIN_OP", "LOG_OP" );
-                  $$ = LOGICAL_OP;
+                  $$ = $1;
+                  $$.type = LOGICAL_OP;
                 }
                 |
                 N_REL_OP
                 {
                   printRule( "BIN_OP", "REL_OP" );
-                  $$ = RELATIONAL_OP;
+                  $$ = $1;
+                  $$.type = RELATIONAL_OP;
                 };
 N_ARITH_OP:
                 T_ADD
                 {
                   printRule( "ARITH_OP", "+" );
+                  $$.name = (char*)"+";
                 }
                 | T_SUB
                 {
                   printRule( "ARITH_OP", "-" );
+                  $$.name = (char*)"-";
                 }
                 | T_MULT
                 {
                   printRule( "ARITH_OP", "*" );
+                  $$.name = (char*)"*";
                 }
                 | T_DIV
                 {
                   printRule( "ARITH_OP", "/" );
+                  $$.name = (char*)"/";
                 };
 N_REL_OP: T_LT
                 {
                   printRule( "REL_OP", "<" );
+                  $$.name = (char*)"<";
                 }
                 | T_GT
                 {
                   printRule( "REL_OP", ">" );
+                  $$.name = (char*)">";
                 }
                 | T_LE
                 {
                   printRule( "REL_OP", "<=" );
+                  $$.name = (char*)"<=";
                 }
                 | T_GE
                 {
                   printRule( "REL_OP", ">=" );
+                  $$.name = (char*)">=";
                 }
                 | T_EQ
                 {
                   printRule( "REL_OP", "=" );
+                  $$.name = (char*)"=";
                 }
                 | T_NE
                 {
                   printRule( "REL_OP", "/=" );
+                  $$.name = (char*)"/=";
                 };
 N_LOG_OP:
                 T_AND
                 {
                   printRule( "LOG_OP", "and" );
+                  $$.name = (char*)"and";
                 }
                 | T_OR
                 {
                   printRule( "LOG_OP", "or" );
+                  $$.name = (char*)"or";
                 };
 N_UN_OP:
                 T_NOT
@@ -402,9 +511,9 @@ void endScope()
 TYPE_INFO findEntryInAnyScope( const string theName )
 {
   TYPE_INFO info = {UNDEFINED};
-  if ( scopeStack.empty( ) ) return( info );
+  if( scopeStack.empty( ) ) return( info );
   info = scopeStack.top().findEntry( theName );
-  if ( info.type != UNDEFINED )
+  if( info.type != UNDEFINED )
     return( info );
   else   // check in "next higher" scope
   {
@@ -425,6 +534,34 @@ void cleanUp()
     scopeStack.pop();
     cleanUp();
   }
+}
+
+void setVal( TYPE_INFO& lhs, TYPE_INFO& rhs )
+{
+  if( rhs.type == BOOL || rhs.type == INT )
+    lhs.intVal = rhs.intVal;
+  else
+    lhs.strVal = rhs.strVal;
+}
+
+char** getVal( TYPE_INFO var )
+{
+  if( var.type == BOOL )
+  {
+    if( var.intVal == 0 )
+      return (char**)"nil";
+    else
+      return (char**)"t";
+  }
+  else if( var.type == INT )
+  {
+    static char buffer[1024];
+
+    sprintf( buffer, "%d", var.intVal );
+    return (char**)buffer;
+  }
+  else
+    return var.strVal;
 }
 
 int main( int argc, char** argv )
