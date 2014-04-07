@@ -26,7 +26,7 @@ using namespace std;
 
 #include <string.h>
 
-#define DEBUG
+//#define DEBUG
 
 #define KNRM  "\x1B[0m"
 #define KRED  "\x1B[31m"
@@ -364,7 +364,7 @@ N_ARITHLOGIC_EXPR	:
                     }
                     else if( !strcmp( $1.name, "=" ) &&  $2.intVal == $3.intVal )
                       $$.intVal = 1;
-                    else if( !strcmp( $1.name, "/=" ) && $2.intVal == $3.intVal )
+                    else if( !strcmp( $1.name, "/=" ) && $2.intVal != $3.intVal )
                       $$.intVal = 1;
                     
                     break;
