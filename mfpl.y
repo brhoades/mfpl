@@ -321,6 +321,41 @@ N_ARITHLOGIC_EXPR	:
                       yyerror( "Arg 2 must be string" );
                       return( 0 );
                     }
+                   
+                    //hyack
+                    if( $3.type == STR )
+                      $3.intVal = strlen( *$3.strVal );
+                    
+                    if( $2.type == STR )
+                      $2.intVal = strlen( *$2.strVal );
+
+                    $$.intVal = 0; 
+                    if( !strcmp( $1.name, "<" ) || !strcmp( $1.name, "<=" ) )
+                    {
+
+                      if( $2.intVal < $3.intVal )
+                        $$.intVal = 1;
+                      else
+                      {
+                        if( $2.intVal <= $3.intVal && !strcmp( $1.name, "<=" ) )
+                          $$.intVal = 1;
+                      }
+                    }
+                    else if( !strcmp( $1.name, ">" ) || !strcmp( $1.name, ">=" ) )
+                    {
+                      if( $2.intVal > $3.intVal )
+                        $$.intVal = 1;
+                      else
+                      {
+                        if( $2.intVal >= $3.intVal && !strcmp( $1.name, ">=" ) )
+                          $$.intVal = 1;
+                      }
+                    }
+                    else if( !strcmp( $1.name, "=" ) &&  $2.intVal == $3.intVal )
+                      $$.intVal = 1;
+                    else if( !strcmp( $1.name, "/=" ) && $2.intVal == $3.intVal )
+                      $$.intVal = 1;
+                    
                     break;
                   }  // end switch
                 };
@@ -350,7 +385,7 @@ N_ID_EXPR_LIST: /* epsilon */
                   bool success = scopeStack.top().addEntry
                   ( SYMBOL_TABLE_ENTRY( lexeme,
                   exprTypeInfo ) );
-                  if ( ! success )
+                  if( !success )
                   {
                     yyerror( "Multiply defined identifier" );
                     return( 0 );
