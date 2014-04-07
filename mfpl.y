@@ -102,7 +102,7 @@
 %type	<text>     T_IDENT
 %type <typeInfo> N_EXPR N_PARENTHESIZED_EXPR N_ARITHLOGIC_EXPR
 %type <typeInfo> N_CONST N_IF_EXPR N_PRINT_EXPR N_INPUT_EXPR
-%type <typeInfo> N_LET_EXPR N_EXPR_LIST
+%type <typeInfo> N_LET_EXPR N_EXPR_LIST N_ID_EXPR_LIST
 %type <op>       N_BIN_OP N_ARITH_OP N_LOG_OP N_REL_OP 
 
 /*
@@ -379,6 +379,7 @@ N_LET_EXPR: T_LETSTAR T_LPAREN N_ID_EXPR_LIST T_RPAREN N_EXPR
                   "let* ( ID_EXPR_LIST ) EXPR" );
                   endScope();
                   $$.type = $5.type;
+                  setVal( $$, $5 );
                 };
 N_ID_EXPR_LIST: /* epsilon */
                 {
@@ -386,19 +387,23 @@ N_ID_EXPR_LIST: /* epsilon */
                 }
                 | N_ID_EXPR_LIST T_LPAREN T_IDENT N_EXPR T_RPAREN
                 {
-                  printRule( "ID_EXPR_LIST",
-                  "ID_EXPR_LIST ( IDENT EXPR )" );
+                  printRule( "ID_EXPR_LIST", "ID_EXPR_LIST ( IDENT EXPR )" );
                   string lexeme = string( $3 );
                   TYPE_INFO exprTypeInfo = $4;
+
                   printf( "___Adding %s to symbol table\n", $3 );
+                  
                   bool success = scopeStack.top().addEntry
-                  ( SYMBOL_TABLE_ENTRY( lexeme,
-                  exprTypeInfo ) );
+                  
+                  ( SYMBOL_TABLE_ENTRY( lexeme, exprTypeInfo ) );
+
                   if( !success )
                   {
                     yyerror( "Multiply defined identifier" );
                     return( 0 );
                   }
+                  $$.type = $4.type;
+                  setVal( $$, $4 );
                 };
 N_PRINT_EXPR: T_PRINT N_EXPR
                 {
