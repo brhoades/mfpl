@@ -26,7 +26,7 @@ using namespace std;
 
 #include <string.h>
 
-//#define DEBUG
+#define DEBUG
 
 #define KNRM  "\x1B[0m"
 #define KRED  "\x1B[31m"
@@ -100,7 +100,7 @@ using namespace std;
 %token T_LT T_GT T_LE T_GE T_EQ T_NE T_AND T_OR T_NOT
 %token T_INTCONST T_STRCONST T_T T_NIL T_IDENT T_UNKNOWN
 
-%type	<text>     T_IDENT
+%type	<text>     T_IDENT T_STRCONST
 %type <typeInfo> N_EXPR N_PARENTHESIZED_EXPR N_ARITHLOGIC_EXPR
 %type <typeInfo> N_CONST N_IF_EXPR N_PRINT_EXPR N_INPUT_EXPR
 %type <typeInfo> N_LET_EXPR N_EXPR_LIST
@@ -170,7 +170,11 @@ N_CONST:       T_INTCONST
                {
                  printRule( "CONST", "STRCONST" );
                  $$.type = STR;
-                 $$.strVal = &yylval.text;
+                 #if defined DEBUG
+                 printf( "%sDEBUG: STRCONST -> %s%s\n", KRED, $1, KNRM );
+                 #endif
+                 $$.strVal = new char[strlen($1)+1];
+                 strcpy( $$.strVal, $1 );
                }
                | T_T
                {
@@ -331,10 +335,10 @@ N_ARITHLOGIC_EXPR	:
                    
                     //hyack
                     if( $3.type == STR )
-                      $3.intVal = strlen( *$3.strVal );
+                      $3.intVal = strlen( $3.strVal );
                     
                     if( $2.type == STR )
-                      $2.intVal = strlen( *$2.strVal );
+                      $2.intVal = strlen( $2.strVal );
 
                     $$.intVal = 0; 
                     if( !strcmp( $1.name, "<" ) || !strcmp( $1.name, "<=" ) )
@@ -430,12 +434,13 @@ N_INPUT_EXPR: T_INPUT
                   if( ( atoi( &first ) >= 0 && atoi( &first ) < 10 ) || in[0] == '+' )
                   {
                     $$.type = INT;
-                    $$.intVal = atoi( in.c_str( ) );
+                    $$.intVal = atoi( (char*)in.c_str( ) );
                   }
                   else
                   {
                     $$.type = STR;
-                    $$.strVal = (char**)in.c_str( );
+                    $$.strVal = new char[in.length()+1];
+                    strcpy( $$.strVal, in.c_str( ) );
                   }
                 };
 N_EXPR_LIST: N_EXPR N_EXPR_LIST
@@ -632,7 +637,7 @@ char** getVal( TYPE_INFO var )
     return (char**)buffer;
   }
   else
-    return var.strVal;
+    return (char**)var.strVal;
 }
 
 int main( int argc, char** argv )
