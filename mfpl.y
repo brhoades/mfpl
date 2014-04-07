@@ -425,7 +425,9 @@ N_INPUT_EXPR: T_INPUT
                   
                   getline( cin, in );
 
-                  if( ( in[0] >= 0 && in[0] < 10 ) || in[0] == '+' )
+                  char first = in[0];
+
+                  if( ( atoi( &first ) >= 0 && atoi( &first ) < 10 ) || in[0] == '+' )
                   {
                     $$.type = INT;
                     $$.intVal = atoi( in.c_str( ) );
