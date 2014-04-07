@@ -362,7 +362,16 @@ N_ARITHLOGIC_EXPR	:
 N_IF_EXPR: T_IF N_EXPR N_EXPR N_EXPR
                 {
                   printRule( "IF_EXPR", "if EXPR EXPR EXPR" );
-                  $$.type = $3.type | $4.type;
+                  if( ( $2.type == BOOL && $2.intVal == 1 ) || $2.type != BOOL )
+                  {
+                    $$.type = $3.type;
+                    setVal( $$, $3 );
+                  }
+                  else
+                  {
+                    $$.type = $4.type;
+                    setVal( $$, $4 );
+                  }
                 };
 N_LET_EXPR: T_LETSTAR T_LPAREN N_ID_EXPR_LIST T_RPAREN N_EXPR
                 {
