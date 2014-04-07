@@ -21,7 +21,8 @@
 #include <string>
 #include <stack>
 #include "SymbolTable.h"
-  using namespace std;
+
+using namespace std;
 
 #include <string.h>
 
@@ -102,7 +103,7 @@
 %type	<text>     T_IDENT
 %type <typeInfo> N_EXPR N_PARENTHESIZED_EXPR N_ARITHLOGIC_EXPR
 %type <typeInfo> N_CONST N_IF_EXPR N_PRINT_EXPR N_INPUT_EXPR
-%type <typeInfo> N_LET_EXPR N_EXPR_LIST N_ID_EXPR_LIST
+%type <typeInfo> N_LET_EXPR N_EXPR_LIST
 %type <op>       N_BIN_OP N_ARITH_OP N_LOG_OP N_REL_OP 
 
 /*
@@ -139,6 +140,12 @@ N_EXPR:        N_CONST
                    return( 0 );
                  }
                  $$.type = exprTypeInfo.type;
+                 #if defined DEBUG
+                 if( $$.type != STR )
+                  printf( "%sDEBUG: IDENT LOOKUP  -> %i%s\n", KRED, exprTypeInfo.intVal, KNRM );
+                else
+                  printf( "%sDEBUG: IDENT LOOKUP  -> %s%s\n", KRED, exprTypeInfo.strVal, KNRM );
+                 #endif
                  setVal( $$, exprTypeInfo );
                }
                | T_LPAREN N_PARENTHESIZED_EXPR T_RPAREN
@@ -393,40 +400,53 @@ N_ID_EXPR_LIST: /* epsilon */
 
                   printf( "___Adding %s to symbol table\n", $3 );
                   
-                  bool success = scopeStack.top().addEntry
-                  
-                  ( SYMBOL_TABLE_ENTRY( lexeme, exprTypeInfo ) );
+                  bool success = scopeStack.top().addEntry( SYMBOL_TABLE_ENTRY( lexeme, exprTypeInfo ) );
 
                   if( !success )
                   {
                     yyerror( "Multiply defined identifier" );
                     return( 0 );
                   }
-                  $$.type = $4.type;
-                  setVal( $$, $4 );
                 };
 N_PRINT_EXPR: T_PRINT N_EXPR
                 {
                   printRule( "PRINT_EXPR", "print EXPR" );
                   $$.type = $2.type;
                   setVal( $$, $2 );
+                  #if defined DEBUG
                   printf( "%sDEBUG: EXPR -> %i%s\n ", KRED, $2.intVal, KNRM );
+                  #endif
                   printf( "%s\n", getVal( $2 ) );
                 };
 N_INPUT_EXPR: T_INPUT
                 {
                   printRule( "INPUT_EXPR", "input" );
-                  $$.type = INT_OR_STR;
+                  string in;
+                  
+                  getline( cin, in );
+
+                  if( ( in[0] >= 0 && in[0] < 10 ) || in[0] == '+' )
+                  {
+                    $$.type = INT;
+                    $$.intVal = atoi( in.c_str( ) );
+                  }
+                  else
+                  {
+                    $$.type = STR;
+                    $$.strVal = (char**)in.c_str( );
+                  }
                 };
 N_EXPR_LIST: N_EXPR N_EXPR_LIST
                 {
                   printRule( "EXPR_LIST", "EXPR EXPR_LIST" );
                   $$.type = $2.type;
+                  setVal( $$, $2 );
                 }
                 | N_EXPR
                 {
                   printRule( "EXPR_LIST", "EXPR" );
                   $$.type = $1.type;
+                  setVal( $$, $1 );
                 };
 N_BIN_OP: N_ARITH_OP
                 {

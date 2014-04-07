@@ -41,7 +41,7 @@ class SYMBOL_TABLE_ENTRY
     SYMBOL_TABLE_ENTRY( const string theName, const TYPE_INFO theType )
     {
       name = theName;
-      typeInfo.type = theType.type;
+      typeInfo = theType;
     }
 
     // Accessors
