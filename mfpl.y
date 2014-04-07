@@ -26,7 +26,7 @@ using namespace std;
 
 #include <string.h>
 
-#define DEBUG
+//#define DEBUG
 
 #define KNRM  "\x1B[0m"
 #define KRED  "\x1B[31m"
@@ -275,7 +275,7 @@ N_ARITHLOGIC_EXPR	:
                     {
                       if( $3.intVal == 0 )
                       {
-                        printf( "ERROR PLACEHOLDER: DIV / 0\n" );
+                        printf( "Line %i: Attempted division by zero\n", lineNum );
                         return( 0 );
                       }
                       $$.intVal = $2.intVal / $3.intVal;

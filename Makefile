@@ -1,5 +1,5 @@
-sampleInputDir=docs/hw4/sample_in/
-sampleOutputDir=docs/hw4/sample_out/
+sampleInputDir=docs/hw5/sample_input/
+sampleOutputDir=docs/hw5/expected_output/
 
 sampleInputFiles=$(wildcard $(sampleInputDir)/*.txt)
 sampleOutputFiles=$(wildcard $(sampleOutputDir)/*.out)
@@ -32,7 +32,7 @@ checkoutput: $(buildFiles) $(diffFiles)
 	$(diff) $(addsuffix .out,$(basename $@)) $(sampleOutputDir)/$(addsuffix .out,$(notdir $(basename $@))) > $@ | :
 
 %.out: $(sampleInputFiles)
-	./mfpl_parser < $(sampleInputDir)/$(basename $(notdir $@)) > build/$(notdir $@)
+	./mfpl_parser $(sampleInputDir)/$(basename $(notdir $@)) > build/$(notdir $@) | :
 
 clean: 
 	rm *.tab.c *.yy.c *.orig mfpl_parser &> /dev/null | :
